@@ -41,7 +41,7 @@ public class JUnitMain {
                 new Command("get", 1, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if(workingTableProvider.getCurrentTable() != null) {
+                        if (workingTableProvider.getCurrentTable() != null) {
                             workingTableProvider.getCurrentTable().get(arguments[0]);
                         } else {
                             System.out.println("no table");
@@ -51,7 +51,7 @@ public class JUnitMain {
                 new Command("remove", 1, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if(workingTableProvider.getCurrentTable() != null) {
+                        if (workingTableProvider.getCurrentTable() != null) {
                             workingTableProvider.getCurrentTable().remove(arguments[0]);
                         } else {
                             System.out.println("no table");
@@ -61,7 +61,7 @@ public class JUnitMain {
                 new Command("list", 0, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if(workingTableProvider.getCurrentTable() != null) {
+                        if (workingTableProvider.getCurrentTable() != null) {
                             workingTableProvider.getCurrentTable().list();
                         } else {
                             System.out.println("no table");
@@ -90,7 +90,7 @@ public class JUnitMain {
                 new Command("size", 0, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if(workingTableProvider.getCurrentTable() != null) {
+                        if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println(workingTableProvider.getCurrentTable().size());
                         } else {
                             System.out.println("no table");
@@ -101,7 +101,7 @@ public class JUnitMain {
                 new Command("commit", 0, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if(workingTableProvider.getCurrentTable() != null) {
+                        if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println("commit");
                             System.out.println(workingTableProvider.getCurrentTable().commit());
                         } else {
@@ -112,7 +112,7 @@ public class JUnitMain {
                 new Command("rollback", 0, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if(workingTableProvider.getCurrentTable() != null) {
+                        if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println("rollback");
                             System.out.println(workingTableProvider.getCurrentTable().rollback());
                         } else {
