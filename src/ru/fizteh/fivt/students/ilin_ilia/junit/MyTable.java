@@ -70,7 +70,7 @@ public class MyTable implements Table {
     public Pair<Integer, Integer> convertIntoHashRule(final String key) {
         byte byt = 0;
         try {
-            byt = key.getBytes(CODING_TYPE  )[0];
+            byt = key.getBytes(CODING_TYPE)[0];
         } catch (UnsupportedEncodingException e) {
             System.out.println("Can't decode key to UTF-8");
             System.exit(-1);

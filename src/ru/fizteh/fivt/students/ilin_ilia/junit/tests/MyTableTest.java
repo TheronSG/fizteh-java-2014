@@ -22,7 +22,7 @@ public class MyTableTest {
     @Before
     public void beforeTest() {
         myTableProvider = new MyTableProvider(testDir.toString() + "\\DbTest");
-        myTable = (MyTable)myTableProvider.createTable(testDir.resolve("DbTest").resolve("t1").toString());
+        myTable = (MyTable) myTableProvider.createTable(testDir.resolve("DbTest").resolve("t1").toString());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class MyTableTest {
 
     @Test
     public void rollbackNotNullTest() {
-        myTable.put("k1" ,"1");
+        myTable.put("k1", "1");
         myTable.commit();
         assertEquals(myTable.rollback(), 1);
     }
