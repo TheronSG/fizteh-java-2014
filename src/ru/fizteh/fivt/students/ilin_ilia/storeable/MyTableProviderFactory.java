@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.theronsg.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable;
 
 import ru.fizteh.fivt.storage.structured.TableProvider;
 import ru.fizteh.fivt.storage.structured.TableProviderFactory;
