@@ -18,9 +18,10 @@ public class FileMap {
     private String name;
     private File fil;
     private File containsDir;
+    public static final String CODING_TYPE = "UTF-8";
 
     FileMap(final String pathToFile, final String pathToContainsDir) {
-        map = new HashMap<String, String>();
+        map = new HashMap<>();
         fil = new File(pathToFile + ".dat");
         containsDir = new File(pathToContainsDir);
         name = pathToFile + ".dat";
@@ -34,33 +35,15 @@ public class FileMap {
     }
 
     public String put(final String key, final String value) {
-        String old = map.put(key, value);
-        if (old != null) {
-            System.out.println("overwrite\nold " + old);
-        } else {
-            System.out.println("new");
-        }
-        return old;
+        return map.put(key, value);
     }
 
     public String get(final String key) {
-        String value = map.get(key);
-        if (value == null) {
-            System.out.println("not found");
-        } else {
-            System.out.println("found\n" + value);
-        }
-        return value;
+        return map.get(key);
     }
 
     public String remove(final String key) {
-        if (map.containsKey(key)) {
-            System.out.println("removed");
-            return map.remove(key);
-        } else {
-            System.out.println("not found");
-            return null;
-        }
+        return map.remove(key);
     }
 
     public Set<String> list() {
@@ -87,8 +70,8 @@ public class FileMap {
             return;
         }
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        List<Integer> offsets = new LinkedList<Integer>();
-        List<String> keys = new LinkedList<String>();
+        List<Integer> offsets = new LinkedList<>();
+        List<String> keys = new LinkedList<>();
         byte b;
         int bytesCounter = 0;
         int off = -1;
@@ -104,7 +87,7 @@ public class FileMap {
                 offsets.add(file.readInt());
             }
             bytesCounter += 4;
-            keys.add((buf.toString("UTF-8")));
+            keys.add((buf.toString(CODING_TYPE)));
             buf.reset();
         } while (bytesCounter < off);
         try {
@@ -116,7 +99,7 @@ public class FileMap {
                     bytesCounter++;
                 }
                 if (buf.size() > 0) {
-                    map.put(keyIter.next(), buf.toString("UTF-8"));
+                    map.put(keyIter.next(), buf.toString(CODING_TYPE));
                     buf.reset();
                 } else {
                     file.close();
@@ -159,17 +142,17 @@ public class FileMap {
             }
             file.setLength(0);
             Set<String> keys = map.keySet();
-            List<Integer> offsetsPos = new LinkedList<Integer>();
+            List<Integer> offsetsPos = new LinkedList<>();
             for (String cur : keys) {
-                file.write(cur.getBytes("UTF-8"));
+                file.write(cur.getBytes(CODING_TYPE));
                 file.write('\0');
                 offsetsPos.add(((int) file.getFilePointer()));
                 file.writeInt(0);
             }
-            List<Integer> offsets = new LinkedList<Integer>();
+            List<Integer> offsets = new LinkedList<>();
             for (String cur : keys) {
                 offsets.add((int) file.getFilePointer());
-                file.write(map.get(cur).getBytes("UTF-8"));
+                file.write(map.get(cur).getBytes(CODING_TYPE));
             }
             Iterator<Integer> offIter = offsets.iterator();
             for (int pos :offsetsPos) {
