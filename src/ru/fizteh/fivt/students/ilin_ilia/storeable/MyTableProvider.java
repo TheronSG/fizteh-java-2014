@@ -83,8 +83,7 @@ public class MyTableProvider implements TableProvider {
             throw new IllegalArgumentException("Can't remove table. " + "\"" + name + "\" has inadmissible symbols");
         } else {
             if (!new File(currentFactory.resolve(name).toString()).exists()) {
-                throw new IllegalStateException("Can't remove the following table: " + "\"" + name
-                        + "\". It doesn't exist.");
+                throw new IllegalStateException(name + " not exists");
             }
             File fileName = new File(currentFactory.resolve(name).toString());
             if (fileName.isFile()) {
