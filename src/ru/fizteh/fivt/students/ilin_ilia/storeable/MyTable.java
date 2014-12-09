@@ -225,7 +225,6 @@ public class MyTable implements Table {
                 keys.add(listKey);
             }
         }
-        System.out.println(String.join(", ", keys));
         return keys;
     }
 
