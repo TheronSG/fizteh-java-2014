@@ -1,11 +1,11 @@
-package ru.fizteh.fivt.students.theronsg.junit.tests;
+package ru.fizteh.fivt.students.ilin_ilia.junit.tests;
 
 import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import ru.fizteh.fivt.students.theronsg.junit.MyTableProviderFactory;
+import ru.fizteh.fivt.students.ilin_ilia.junit.MyTableProviderFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
