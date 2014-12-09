@@ -31,30 +31,60 @@ public class JUnitMain {
                 new Command("put", 2, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if (workingTableProvider.getCurrentTable() != null) {
-                            workingTableProvider.getCurrentTable().put(arguments[0], arguments[1]);
-                        } else {
-                            System.out.println("no table");
+                        try {
+                            if (workingTableProvider.getCurrentTable() != null) {
+                                String old = workingTableProvider.getCurrentTable().put(arguments[0], arguments[1]);
+                                if (old == null) {
+                                    System.out.println("new");
+                                } else {
+                                    System.out.println("overwrite");
+                                    System.out.println(old);
+                                }
+                            } else {
+                                System.out.println("no table");
+                            }
+                        } catch (IllegalArgumentException | IllegalStateException e) {
+                            System.err.println(e.getMessage());
                         }
                     }
                 }),
                 new Command("get", 1, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if (workingTableProvider.getCurrentTable() != null) {
-                            workingTableProvider.getCurrentTable().get(arguments[0]);
-                        } else {
-                            System.out.println("no table");
+                        try {
+                            if (workingTableProvider.getCurrentTable() != null) {
+                                String value = workingTableProvider.getCurrentTable().get(arguments[0]);
+                                if (value == null) {
+                                    System.out.println("not found");
+                                } else {
+                                    System.out.println("found");
+                                    System.out.println(value);
+                                }
+                            } else {
+                                System.out.println("no table");
+                            }
+                        } catch (IllegalArgumentException | IllegalStateException e) {
+                            System.err.println(e.getMessage());
                         }
                     }
                 }),
                 new Command("remove", 1, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if (workingTableProvider.getCurrentTable() != null) {
-                            workingTableProvider.getCurrentTable().remove(arguments[0]);
-                        } else {
-                            System.out.println("no table");
+                        try {
+                            if (workingTableProvider.getCurrentTable() != null) {
+                                String value = workingTableProvider.getCurrentTable().remove(arguments[0]);
+                                if (value == null) {
+                                    System.out.println("not found");
+                                } else {
+                                    System.out.println("removed");
+                                    System.out.println(value);
+                                }
+                            } else {
+                                System.out.println("no table");
+                            }
+                        } catch (IllegalArgumentException | IllegalStateException e) {
+                            System.err.println(e.getMessage());
                         }
                     }
                 }),
@@ -62,7 +92,7 @@ public class JUnitMain {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
                         if (workingTableProvider.getCurrentTable() != null) {
-                            workingTableProvider.getCurrentTable().list();
+                            System.out.println(String.join(", ", workingTableProvider.getCurrentTable().list()));
                         } else {
                             System.out.println("no table");
                         }
@@ -71,20 +101,31 @@ public class JUnitMain {
                 new Command("drop", 1, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        if (workingTableProvider.getCurrentTable() != null) {
-                            if (workingTableProvider.getCurrentTable().getName().equals(arguments[0])) {
-                                workingTableProvider.setCurrentTable(null);
+                        try {
+                            if (workingTableProvider.getCurrentTable() != null) {
+                                if (workingTableProvider.getCurrentTable().getName().equals(arguments[0])) {
+                                    workingTableProvider.setCurrentTable(null);
+                                }
                             }
+                            workingTableProvider.getTableProvider().removeTable(arguments[0]);
+                            System.out.println("dropped");
+                        } catch (RuntimeException e) {
+                            System.err.println(e.getMessage());
                         }
-                        workingTableProvider.getTableProvider().removeTable(arguments[0]);
-                        System.out.println("dropped");
                     }
                 }),
                 new Command("create", 1, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        workingTableProvider.getTableProvider().createTable(arguments[0]);
-                        System.out.println("created");
+                        try {
+                            if (workingTableProvider.getTableProvider().createTable(arguments[0]) != null) {
+                                System.out.println(arguments[0] + " exists");
+                            } else {
+                                System.out.println("created");
+                            }
+                        } catch (IllegalArgumentException e) {
+                            System.err.println(e.getMessage());
+                        }
                     }
                 }),
                 new Command("size", 0, new BiConsumer<WorkingTableProvider, String[]>() {
