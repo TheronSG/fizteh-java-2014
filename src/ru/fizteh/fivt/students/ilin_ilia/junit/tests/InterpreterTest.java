@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.function.BiConsumer;
 
-import ru.fizteh.fivt.students.theronsg.junit.*;
+import ru.fizteh.fivt.students.ilin_ilia.junit.*;
 
 public class InterpreterTest {
     private Interpreter interpreter;
