@@ -48,7 +48,7 @@ public class StoreableMain {
                             } else {
                                 System.out.println("no table");
                             }
-                        } catch (ParseException | ColumnFormatException e) {
+                        } catch (ParseException | IllegalStateException | IllegalArgumentException e) {
                             System.err.println("wrong type (" + e.getMessage() + ")");
                         }
                     }
@@ -71,7 +71,7 @@ public class StoreableMain {
                             } else {
                                 System.out.println("no table");
                             }
-                        } catch (ColumnFormatException e) {
+                        } catch (IllegalArgumentException | IllegalStateException e) {
                             System.err.println("wrong type (" + e.getMessage() + ")");
                         }
                     }
@@ -94,7 +94,7 @@ public class StoreableMain {
                             } else {
                                 System.out.println("no table");
                             }
-                        } catch (ColumnFormatException e) {
+                        } catch (IllegalArgumentException | IllegalStateException e) {
                             System.err.println("wrong type (" + e.getMessage() + ")");
                         }
                     }
@@ -103,7 +103,7 @@ public class StoreableMain {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
                         if (workingTableProvider.getCurrentTable() != null) {
-                            workingTableProvider.getCurrentTable().list();
+                            System.out.println(String.join(", ", workingTableProvider.getCurrentTable().list()));
                         } else {
                             System.out.println("no table");
                         }
@@ -145,12 +145,15 @@ public class StoreableMain {
                                 clas = arguments[1].substring(1, arguments[1].length() - 1);
                                 classes.add(Class.forName("java.lang." + clas));
                             }
-                            workingTableProvider.getTableProvider().createTable(arguments[0], classes);
-                            System.out.println("created");
+                            if (workingTableProvider.getTableProvider().createTable(arguments[0], classes) == null) {
+                                System.out.println(arguments[0] + " exists");
+                            } else {
+                                System.out.println("created");
+                            }
                         } catch (ClassNotFoundException e) {
                             System.err.println("Error! Class \"" + clas + "\" doesn't exist.");
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } catch (IOException | IllegalArgumentException e) {
+                            System.err.println(e.getMessage());
                         }
                     }
                 }),
