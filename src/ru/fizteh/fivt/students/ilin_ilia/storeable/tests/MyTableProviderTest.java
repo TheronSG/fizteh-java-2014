@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.theronsg.storeable.tests;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.tests;
 
 import org.junit.After;
 import org.junit.Before;
@@ -7,8 +7,8 @@ import org.junit.Test;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
-import ru.fizteh.fivt.students.theronsg.storeable.MyStoreable;
-import ru.fizteh.fivt.students.theronsg.storeable.MyTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.MyStoreable;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.MyTableProvider;
 
 import java.io.File;
 import java.io.IOException;
