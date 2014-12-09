@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.theronsg.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable;
 
 import java.io.IOException;
 import java.io.InputStream;
