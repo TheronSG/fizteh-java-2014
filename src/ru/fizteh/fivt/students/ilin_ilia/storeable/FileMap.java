@@ -17,6 +17,7 @@ public class FileMap {
     private File containsDir;
     private Table containsTable;
     private TableProvider containsTableProvider;
+    public static final String CODING_TYPE = "UTF-8";
 
     FileMap(final String pathToFile, final String pathToContainsDir, Table table, TableProvider tableProvider) throws ParseException {
         containsTable = table;
@@ -88,7 +89,7 @@ public class FileMap {
                 offsets.add(file.readInt());
             }
             bytesCounter += 4;
-            keys.add((buf.toString("UTF-8")));
+            keys.add((buf.toString(CODING_TYPE)));
             buf.reset();
         } while (bytesCounter < off);
         try {
@@ -100,7 +101,7 @@ public class FileMap {
                     bytesCounter++;
                 }
                 if (buf.size() > 0) {
-                    mapString.put(keyIter.next(), buf.toString("UTF-8"));
+                    mapString.put(keyIter.next(), buf.toString(CODING_TYPE));
                     buf.reset();
                 } else {
                     file.close();
@@ -153,7 +154,7 @@ public class FileMap {
             Set<String> keys = mapString.keySet();
             List<Integer> offsetsPos = new LinkedList<>();
             for (String cur : keys) {
-                file.write(cur.getBytes("UTF-8"));
+                file.write(cur.getBytes(CODING_TYPE));
                 file.write('\0');
                 offsetsPos.add(((int) file.getFilePointer()));
                 file.writeInt(0);
@@ -161,7 +162,7 @@ public class FileMap {
             List<Integer> offsets = new LinkedList<>();
             for (String cur : keys) {
                 offsets.add((int) file.getFilePointer());
-                file.write(mapString.get(cur).getBytes("UTF-8"));
+                file.write(mapString.get(cur).getBytes(CODING_TYPE));
             }
             Iterator<Integer> offIter = offsets.iterator();
             for (int pos :offsetsPos) {
