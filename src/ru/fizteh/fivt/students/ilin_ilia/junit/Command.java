@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.theronsg.junit;
+package ru.fizteh.fivt.students.ilin_ilia.junit;
 
 import java.util.function.BiConsumer;
 
