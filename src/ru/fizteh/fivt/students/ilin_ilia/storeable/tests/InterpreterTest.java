@@ -1,10 +1,10 @@
-package ru.fizteh.fivt.students.theronsg.storeable.tests;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.tests;
 
 import org.junit.Test;
-import ru.fizteh.fivt.students.theronsg.storeable.Command;
-import ru.fizteh.fivt.students.theronsg.storeable.Interpreter;
-import ru.fizteh.fivt.students.theronsg.storeable.StopInterpretationException;
-import ru.fizteh.fivt.students.theronsg.storeable.WorkingTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.Command;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.Interpreter;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.StopInterpretationException;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.WorkingTableProvider;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
