@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.theronsg.junit.tests;
+package ru.fizteh.fivt.students.ilin_ilia.junit.tests;
 
 import org.junit.Test;
 
