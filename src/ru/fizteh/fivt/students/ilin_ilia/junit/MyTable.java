@@ -91,10 +91,8 @@ public class MyTable implements Table {
             throw new IllegalArgumentException("Can't get value. Empty key is impossible.");
         }
         if (commitFiles.containsKey(convertIntoHashRule(key))) {
-            String fileKey  = commitFiles.get(convertIntoHashRule(key)).get(key);
-            return fileKey;
+            return commitFiles.get(convertIntoHashRule(key)).get(key);
         } else {
-            System.out.println("not found");
             return null;
         }
     }
@@ -133,10 +131,8 @@ public class MyTable implements Table {
         }
         Pair<Integer, Integer> pair = convertIntoHashRule(key);
         if (commitFiles.containsKey(pair)) {
-            String fileKey  = commitFiles.get(convertIntoHashRule(key)).remove(key);
-            return fileKey;
+            return commitFiles.get(convertIntoHashRule(key)).remove(key);
         } else {
-            System.out.println("not found");
             return null;
         }
     }
@@ -183,7 +179,6 @@ public class MyTable implements Table {
                 keys.add(listKey);
             }
         }
-        System.out.println(String.join(", ", keys));
         return keys;
     }
 
