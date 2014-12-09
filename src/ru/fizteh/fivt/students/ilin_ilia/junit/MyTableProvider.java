@@ -18,7 +18,7 @@ public class MyTableProvider implements TableProvider {
     public MyTableProvider(final String dir) {
         currentFactory = Paths.get(dir);
         File curTableProvider = currentFactory.toFile();
-        tables = new HashMap<String, Table>();
+        tables = new HashMap<>();
         if (curTableProvider.exists()) {
             for (String file : curTableProvider.list()) {
                 tables.put(file, new MyTable(currentFactory.resolve(file).toString()));
@@ -72,8 +72,7 @@ public class MyTableProvider implements TableProvider {
             throw new IllegalArgumentException("Can't remove table. " + "\"" + name + "\" has inadmissible symbols");
         } else {
             if (!new File(currentFactory.resolve(name).toString()).exists()) {
-                throw new IllegalStateException("Can't remove the following table: " + "\"" + name
-                        + "\". It doesn't exist.");
+                throw new IllegalStateException(name + " not exists");
             }
             File fileName = new File(currentFactory.resolve(name).toString());
             if (fileName.isFile()) {
