@@ -31,12 +31,16 @@ public class MyStoreable implements Storeable {
 
     @Override
     public void setColumnAt(int columnIndex, Object value) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (value.getClass() != containsTable.getColumnType(columnIndex) && value != null) {
-            throw new ColumnFormatException("Types mismatching in method setColumnAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
+        if (value != null) {
+            if (value.getClass() != containsTable.getColumnType(columnIndex)) {
+                throw new ColumnFormatException("Types mismatching in method setColumnAt.");
+            } else if (columnIndex > 6) {
+                throw new IndexOutOfBoundsException("Wrong index.");
+            } else {
+                keys[columnIndex] = value;
+            }
         } else {
-            keys[columnIndex] = value;
+            keys[columnIndex] = null;
         }
 
     }
