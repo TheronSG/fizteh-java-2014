@@ -140,34 +140,34 @@ public class StoreableMain {
                 new Command("create", -1, new BiConsumer<WorkingTableProvider, String[]>() {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        String clas = "";
+                        String className = "";
                         try {
                             List<Class<?>> classes = new LinkedList<>();
                             if (arguments.length != 2) {
-                                clas = arguments[1].substring(1, arguments[1].length());
-                                if (classesMap.containsKey(clas)) {
-                                    clas = classesMap.get(clas);
+                                className = arguments[1].substring(1, arguments[1].length());
+                                if (classesMap.containsKey(className)) {
+                                    className = classesMap.get(className);
                                 }
-                                classes.add(Class.forName("java.lang." + clas));
+                                classes.add(Class.forName("java.lang." + className));
                                 int i;
                                 for (i = 2; i < arguments.length - 1; i++) {
-                                    clas = arguments[i];
-                                    if (classesMap.containsKey(clas)) {
-                                        clas = classesMap.get(clas);
+                                    className = arguments[i];
+                                    if (classesMap.containsKey(className)) {
+                                        className = classesMap.get(className);
                                     }
                                     classes.add(Class.forName("java.lang." + arguments[i]));
                                 }
-                                clas = arguments[i].substring(0, arguments[i].length() - 1);
-                                if (classesMap.containsKey(clas)) {
-                                    clas = classesMap.get(clas);
+                                className = arguments[i].substring(0, arguments[i].length() - 1);
+                                if (classesMap.containsKey(className)) {
+                                    className = classesMap.get(className);
                                 }
-                                classes.add(Class.forName("java.lang." + clas));
+                                classes.add(Class.forName("java.lang." + className));
                             } else  {
-                                clas = arguments[1].substring(1, arguments[1].length() - 1);
-                                if (classesMap.containsKey(clas)) {
-                                    clas = classesMap.get(clas);
+                                className = arguments[1].substring(1, arguments[1].length() - 1);
+                                if (classesMap.containsKey(className)) {
+                                    className = classesMap.get(className);
                                 }
-                                classes.add(Class.forName("java.lang." + clas));
+                                classes.add(Class.forName("java.lang." + className));
                             }
                             if (workingTableProvider.getTableProvider().createTable(arguments[0], classes) == null) {
                                 System.out.println(arguments[0] + " exists");
@@ -175,7 +175,7 @@ public class StoreableMain {
                                 System.out.println("created");
                             }
                         } catch (ClassNotFoundException e) {
-                            System.err.println("Error! Class \"" + clas + "\" doesn't exist.");
+                            System.err.println("Error! Class \"" + className + "\" doesn't exist.");
                         } catch (IOException | IllegalArgumentException e) {
                             System.err.println(e.getMessage());
                         }
