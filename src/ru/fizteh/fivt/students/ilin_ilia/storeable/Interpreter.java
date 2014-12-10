@@ -106,7 +106,7 @@ public class Interpreter {
                     chunks[2] = buff;
                     params = Arrays.copyOfRange(chunks, 1, 3);
                 } else {
-                    params = new String[0];
+                    params = new String[1];
                 }
             } else if (chunks.length > 1 && chunks[0].equals("show") && chunks[1].equals("tables")) {
                 params = Arrays.copyOfRange(chunks, 2, chunks.length);
