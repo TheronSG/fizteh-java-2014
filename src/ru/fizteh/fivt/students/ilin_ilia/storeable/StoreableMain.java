@@ -1,14 +1,20 @@
 package ru.fizteh.fivt.students.ilin_ilia.storeable;
 
-import ru.fizteh.fivt.storage.structured.*;
+import ru.fizteh.fivt.storage.structured.Storeable;
+import ru.fizteh.fivt.storage.structured.Table;
+import ru.fizteh.fivt.storage.structured.TableProvider;
+import ru.fizteh.fivt.storage.structured.TableProviderFactory;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class StoreableMain {
+    private static Map<String, String> classesMap = new HashMap<>();
 
     public static void main(final String [] args) {
         try {
@@ -20,6 +26,12 @@ public class StoreableMain {
             TableProviderFactory tableProviderFactory = new MyTableProviderFactory();
             TableProvider tableProvider = tableProviderFactory.create(dbDirPath);
             WorkingTableProvider workingTableProvider = new WorkingTableProvider(tableProvider);
+            classesMap.put("int", "Integer");
+            classesMap.put("boolean", "Boolean");
+            classesMap.put("long", "Long");
+            classesMap.put("double", "Double");
+            classesMap.put("float", "Float");
+            classesMap.put("byte", "Byte");
             run(workingTableProvider, args);
         } catch (Exception e) {
             e.printStackTrace();
@@ -133,16 +145,28 @@ public class StoreableMain {
                             List<Class<?>> classes = new LinkedList<>();
                             if (arguments.length != 2) {
                                 clas = arguments[1].substring(1, arguments[1].length());
+                                if (classesMap.containsKey(clas)) {
+                                    clas = classesMap.get(clas);
+                                }
                                 classes.add(Class.forName("java.lang." + clas));
                                 int i;
                                 for (i = 2; i < arguments.length - 1; i++) {
                                     clas = arguments[i];
+                                    if (classesMap.containsKey(clas)) {
+                                        clas = classesMap.get(clas);
+                                    }
                                     classes.add(Class.forName("java.lang." + arguments[i]));
                                 }
                                 clas = arguments[i].substring(0, arguments[i].length() - 1);
+                                if (classesMap.containsKey(clas)) {
+                                    clas = classesMap.get(clas);
+                                }
                                 classes.add(Class.forName("java.lang." + clas));
                             } else  {
                                 clas = arguments[1].substring(1, arguments[1].length() - 1);
+                                if (classesMap.containsKey(clas)) {
+                                    clas = classesMap.get(clas);
+                                }
                                 classes.add(Class.forName("java.lang." + clas));
                             }
                             if (workingTableProvider.getTableProvider().createTable(arguments[0], classes) == null) {
@@ -201,14 +225,16 @@ public class StoreableMain {
                         boolean isChanges = false;
                         if (workingTableProvider.getCurrentTable() != null) {
                             MyTable myTable = (MyTable) workingTableProvider.getCurrentTable();
-                            if (myTable.getChangesBeforeCommit() != 0) {
+                            if (myTable.getNumberOfUncommittedChanges() != 0) {
                                 isChanges = true;
-                                unsavedChanges = myTable.getChangesBeforeCommit();
+                                unsavedChanges = myTable.getNumberOfUncommittedChanges();
                             }
                         }
                         if (workingTableProvider.getTableProvider().getTable(arguments[0]) != null) {
                             workingTableProvider.setCurrentTable(workingTableProvider.getTableProvider()
                                     .getTable(arguments[0]));
+                            MyTable myTable = (MyTable) workingTableProvider.getCurrentTable();
+                            myTable.setIsInvitatedTrue();
                             System.out.println("using " + arguments[0]);
                         } else  {
                             System.out.println(arguments[0] + " not exists");
