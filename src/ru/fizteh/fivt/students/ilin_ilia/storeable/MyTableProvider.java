@@ -106,6 +106,7 @@ public class MyTableProvider implements TableProvider {
                 }
             }
         }
+        tables.remove(name);
     }
 
     @Override
@@ -178,21 +179,27 @@ public class MyTableProvider implements TableProvider {
     public String serialize(Table table, Storeable value) throws ColumnFormatException {
         MyStoreable myValue = (MyStoreable) value;
         for (int i = 0; i < myValue.size(); i++) {
-            if (value.getColumnAt(i).getClass() != table.getColumnType(i)) {
-                throw new ColumnFormatException("\"" + i + "\" column doesn't match the column format of the table \""
-                        + table.getName() + "\"");
+            if (value.getColumnAt(i) != null) {
+                if (value.getColumnAt(i).getClass() != table.getColumnType(i)) {
+                    throw new ColumnFormatException("\"" + i + "\" column doesn't match the column format of the table \""
+                            + table.getName() + "\"");
+                }
             }
         }
         MyStoreable myStoreable = (MyStoreable) value;
         String resultString = "[";
         for (int index = 0; index < myStoreable.size(); index++) {
-            if (table.getColumnType(index) == String.class) {
-                resultString += "\"" + value.getStringAt(index) + "\",";
+            if (value.getColumnAt(index) != null) {
+                if (table.getColumnType(index) == String.class) {
+                    resultString += "\"" + value.getStringAt(index) + "\",";
+                } else {
+                    resultString += value.getColumnAt(index).toString() + ", ";
+                }
             } else {
-                resultString += " " + value.getColumnAt(index).toString() + ",";
+                resultString += "null, ";
             }
         }
-        resultString = resultString.substring(0, resultString.length() - 1);
+        resultString = resultString.substring(0, resultString.length() - 2);
         resultString += "]";
         return resultString;
     }
