@@ -17,14 +17,6 @@ public class MyTableProviderFactory implements TableProviderFactory {
         if (dir == null) {
             throw  new IllegalArgumentException();
         }
-        /*try {
-            if (dir == null || checkNameCorrection(dir)) {
-                throw  new IllegalArgumentException();
-            }
-        } catch (IllegalArgumentException e) {
-            System.err.println("Unappropriated name for directory: " + "\""+ dir + "\".");
-            System.exit(-1);
-        }*/
         try {
             TableProvider table = new MyTableProvider(dir);
             return table;
