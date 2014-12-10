@@ -14,33 +14,37 @@ import java.util.List;
 
 public class MyTable implements Table {
     private Path name;
-    private int changesBeforeCommit;
     private int changesAfterCommit;
+    private List<String> commitKeys;
     /**
-     * inputFiles contains files which have read from db.
+     * inputFiles contains files which have read from db and won't change after commit.
      * changingFiles contains keys and values which will add during the programme.
-     * commitFiles contains keys and values after commit command.
      *
      * At the beginning of the programme all of them contain the same keys and values.
      *
-     *  isCommits shows us commit has been or no.
      */
     private HashMap<Pair<Integer, Integer>, FileMap> inputFiles;
     private HashMap<Pair<Integer, Integer>, FileMap> changingFiles;
-    private HashMap<Pair<Integer, Integer>, FileMap> commitFiles;
     public static final String CODING_TYPE = "UTF-8";
     public static final int MAX_DIRECTORIES_AMOUNT  = 16;
     public static final int MAX_FILES_AMOUNT  = 16;
-    private boolean isCommits;
+    /**
+     * If there are some uncommitted changes and we stop the programme
+     * this flag shows if we have printed the message about uncommitted
+     * changes.
+     * It's false if we printed it or there is no uncommitted changes.
+     * isInvitated true in current table and only in it.
+     */
+    private boolean isInvitated;
 
 
 
     MyTable(final String name) {
-        isCommits = false;
+        isInvitated = false;
+        commitKeys = new LinkedList<>();
         this.name = Paths.get(name);
-        inputFiles = new HashMap<Pair<Integer, Integer>, FileMap>();
-        changingFiles = new HashMap<Pair<Integer, Integer>, FileMap>();
-        commitFiles = new HashMap<Pair<Integer, Integer>, FileMap>();
+        inputFiles = new HashMap<>();
+        changingFiles = new HashMap<>();
         File curTable = new File(name);
         if (curTable.exists()) {
             if (curTable.list() != null) {
@@ -52,8 +56,6 @@ public class MyTable implements Table {
                         inputFiles.put(pair, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
                                 this.name.resolve(dir).toString()));
                         changingFiles.put(pair, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
-                                this.name.resolve(dir).toString()));
-                        commitFiles.put(pair, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
                                 this.name.resolve(dir).toString()));
                     }
                 }
@@ -77,7 +79,7 @@ public class MyTable implements Table {
         }
         int ndir = byt % MAX_DIRECTORIES_AMOUNT;
         int nfile = (byt / MAX_FILES_AMOUNT) % MAX_FILES_AMOUNT;
-        return new Pair<Integer, Integer>(ndir, nfile);
+        return new Pair<>(ndir, nfile);
     }
 
     @Override
@@ -90,8 +92,8 @@ public class MyTable implements Table {
         if (key == null) {
             throw new IllegalArgumentException("Can't get value. Empty key is impossible.");
         }
-        if (commitFiles.containsKey(convertIntoHashRule(key))) {
-            return commitFiles.get(convertIntoHashRule(key)).get(key);
+        if (changingFiles.containsKey(convertIntoHashRule(key))) {
+            return changingFiles.get(convertIntoHashRule(key)).get(key);
         } else {
             return null;
         }
@@ -109,14 +111,20 @@ public class MyTable implements Table {
         if (changingFiles.containsKey(pair)) {
             if (changingFiles.get(pair).containsKey(key)) {
                 if (!changingFiles.get(pair).get(key).equals(value)) {
-                    changesBeforeCommit++;
+                    if (!commitKeys.contains(key)) {
+                        commitKeys.add(key);
+                    }
                 }
             } else {
-                changesBeforeCommit++;
+                if (!commitKeys.contains(key)) {
+                    commitKeys.add(key);
+                }
             }
             return changingFiles.get(pair).put(key, value);
         } else {
-            changesBeforeCommit++;
+            if (!commitKeys.contains(key)) {
+                commitKeys.add(key);
+            }
             changingFiles.put(pair,
                     new FileMap(name.resolve(pair.getKey().toString()).resolve(pair.getValue().toString()).toString(),
                             name.resolve(pair.getKey().toString()).toString()));
@@ -129,9 +137,12 @@ public class MyTable implements Table {
         if (key == null) {
             throw new IllegalArgumentException("Can't remove value for empty key.");
         }
+        if (!commitKeys.contains(key)) {
+            commitKeys.remove(key);
+        }
         Pair<Integer, Integer> pair = convertIntoHashRule(key);
-        if (commitFiles.containsKey(pair)) {
-            return commitFiles.get(convertIntoHashRule(key)).remove(key);
+        if (changingFiles.containsKey(pair)) {
+            return changingFiles.get(convertIntoHashRule(key)).remove(key);
         } else {
             return null;
         }
@@ -140,7 +151,7 @@ public class MyTable implements Table {
     @Override
     public int size() {
         int summ = 0;
-        for (FileMap fileMap : commitFiles.values()) {
+        for (FileMap fileMap : changingFiles.values()) {
             summ += fileMap.size();
         }
         return summ;
@@ -148,15 +159,12 @@ public class MyTable implements Table {
 
     @Override
     public int commit() {
-        if (!isCommits) {
-            isCommits = true;
-            commitFiles = changingFiles;
-        } else {
-            inputFiles = commitFiles;
-            commitFiles = changingFiles;
+        inputFiles.clear();
+        for (Pair<Integer, Integer> key : changingFiles.keySet()) {
+            inputFiles.put(key,changingFiles.get(key));
         }
-        changesAfterCommit = changesBeforeCommit;
-        changesBeforeCommit  = 0;
+        changesAfterCommit = commitKeys.size();
+        commitKeys.clear();
         return changesAfterCommit;
     }
 
@@ -164,17 +172,15 @@ public class MyTable implements Table {
     public int rollback() {
         int returnValue = changesAfterCommit;
         changesAfterCommit = 0;
-        changesBeforeCommit = 0;
+        commitKeys.clear();
         changingFiles = inputFiles;
-        commitFiles = inputFiles;
-        isCommits = false;
         return returnValue;
     }
 
     @Override
     public List<String> list() {
         List<String> keys = new LinkedList<>();
-        for (FileMap fileMap : commitFiles.values()) {
+        for (FileMap fileMap : changingFiles.values()) {
             for (String listKey: fileMap.list()) {
                 keys.add(listKey);
             }
@@ -182,17 +188,26 @@ public class MyTable implements Table {
         return keys;
     }
 
-    public int getChangesBeforeCommit() {
-        return changesBeforeCommit;
-    }
 
     public void saveDB() {
-        for (FileMap fileMap : commitFiles.values()) {
+        for (FileMap fileMap : inputFiles.values()) {
             try {
                 fileMap.putFile();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
+        if(commitKeys.size() != 0 && isInvitated) {
+            System.err.println(commitKeys.size() + " unsaved changes");
+        }
+    }
+
+    public int getChangesBeforeCommit() {
+        isInvitated = false;
+        return commitKeys.size();
+    }
+
+    public void setIsInvitatedTrue() {
+        isInvitated = true;
     }
 }
