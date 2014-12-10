@@ -118,7 +118,7 @@ public class JUnitMain {
                     @Override
                     public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
                         try {
-                            if (workingTableProvider.getTableProvider().createTable(arguments[0]) != null) {
+                            if (workingTableProvider.getTableProvider().createTable(arguments[0]) == null) {
                                 System.out.println(arguments[0] + " exists");
                             } else {
                                 System.out.println("created");
@@ -176,6 +176,8 @@ public class JUnitMain {
                         if (workingTableProvider.getTableProvider().getTable(arguments[0]) != null) {
                             workingTableProvider.setCurrentTable(workingTableProvider.getTableProvider()
                                     .getTable(arguments[0]));
+                            MyTable myTable = (MyTable)workingTableProvider.getCurrentTable();
+                            myTable.setIsInvitatedTrue();
                             System.out.println("using " + arguments[0]);
                         } else  {
                             System.out.println(arguments[0] + " not exists");
