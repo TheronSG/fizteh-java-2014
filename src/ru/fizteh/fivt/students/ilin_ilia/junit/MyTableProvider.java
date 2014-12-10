@@ -95,6 +95,7 @@ public class MyTableProvider implements TableProvider {
                 }
             }
         }
+        tables.remove(name);
     }
 
     public boolean checkNameCorrection(final String name) {
