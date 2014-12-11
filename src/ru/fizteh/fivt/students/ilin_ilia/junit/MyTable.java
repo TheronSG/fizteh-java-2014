@@ -173,7 +173,10 @@ public class MyTable implements Table {
         int returnValue = changesAfterCommit;
         changesAfterCommit = 0;
         commitKeys.clear();
-        changingFiles = inputFiles;
+        changingFiles.clear();
+        for (Pair<Integer, Integer> key : inputFiles.keySet()) {
+            changingFiles.put(key, inputFiles.get(key));
+        }
         return returnValue;
     }
 
