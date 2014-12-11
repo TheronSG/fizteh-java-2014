@@ -187,7 +187,7 @@ public class MyTable implements Table {
     public int commit() {
         inputFiles.clear();
         for (Pair<Integer, Integer> key : changingFiles.keySet()) {
-            inputFiles.put(key,changingFiles.get(key));
+            inputFiles.put(key, changingFiles.get(key));
         }
         changesAfterCommit = commitKeys.size();
         commitKeys.clear();
@@ -199,7 +199,10 @@ public class MyTable implements Table {
         int returnValue = changesAfterCommit;
         changesAfterCommit = 0;
         commitKeys.clear();
-        changingFiles = inputFiles;
+        changingFiles.clear();
+        for (Pair<Integer, Integer> key : inputFiles.keySet()) {
+            changingFiles.put(key, inputFiles.get(key));
+        }
         return returnValue;
     }
 
