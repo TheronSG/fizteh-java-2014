@@ -118,7 +118,10 @@ public class MyTableProvider implements TableProvider {
         }
         if (value.charAt(value.length() - 1) != ']') {
             throw new ParseException("Error! String \"" + value + "\" doesn't match the JSON format array. "
-                    + "\']\' must be at the end of the string.", 0);
+                    + "\']\' must be at the end of the string.", value.length() - 1);
+        }
+        if (value.substring(1, value.length() - 1).trim().equals("")) {
+            throw new ParseException("Error! Empty value.", 1);
         }
         String buff = "";
         List<String> parts = new LinkedList<>();
