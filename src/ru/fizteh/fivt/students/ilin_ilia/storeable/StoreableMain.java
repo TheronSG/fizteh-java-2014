@@ -143,25 +143,41 @@ public class StoreableMain {
                         String className = "";
                         try {
                             List<Class<?>> classes = new LinkedList<>();
+                            if (arguments[1].charAt(0) != '(') {
+                                throw new IllegalArgumentException("Wrong data format! \'(\' is missed.");
+                            }
+                            if (arguments[arguments.length - 1].charAt(arguments[arguments.length - 1].length() -1)
+                                    != ')') {
+                                throw new IllegalArgumentException("Wrong data format! \')\' is missed.");
+                            }
                             if (arguments.length != 2) {
                                 className = arguments[1].substring(1, arguments[1].length());
+                                int i = 2;
+                                if (className.equals("")) {
+                                    i = 3;
+                                    className = arguments[2];
+                                }
                                 if (classesMap.containsKey(className)) {
                                     className = classesMap.get(className);
                                 }
                                 classes.add(Class.forName("java.lang." + className));
-                                int i;
-                                for (i = 2; i < arguments.length - 1; i++) {
+                                for (; i < arguments.length - 1; i++) {
                                     className = arguments[i];
+                                    if (className.equals(")") || className.equals("(")) {
+                                        continue;
+                                    }
                                     if (classesMap.containsKey(className)) {
                                         className = classesMap.get(className);
                                     }
-                                    classes.add(Class.forName("java.lang." + arguments[i]));
+                                    classes.add(Class.forName("java.lang." + className));
                                 }
                                 className = arguments[i].substring(0, arguments[i].length() - 1);
                                 if (classesMap.containsKey(className)) {
                                     className = classesMap.get(className);
                                 }
-                                classes.add(Class.forName("java.lang." + className));
+                                if (!className.equals("")) {
+                                    classes.add(Class.forName("java.lang." + className));
+                                }
                             } else  {
                                 className = arguments[1].substring(1, arguments[1].length() - 1);
                                 if (classesMap.containsKey(className)) {
