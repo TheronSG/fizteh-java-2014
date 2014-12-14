@@ -39,11 +39,7 @@ public class MyTableProvider implements TableProvider {
         } else if (!checkNameCorrection(name)) {
             throw new IllegalArgumentException("Can't get table. " + "\"" + name + "\" has inadmissible symbols");
         } else {
-            if (tables.containsKey(name)) {
-                return tables.get(name);
-            } else {
-                return null;
-            }
+            return tables.get(name);
         }
     }
 
