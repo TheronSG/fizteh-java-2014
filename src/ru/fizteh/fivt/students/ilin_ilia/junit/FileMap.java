@@ -17,19 +17,20 @@ public class FileMap {
     private Map<String, String> map;
     private String name;
     private File fil;
-    private File containsDir;
+    private File containingDir;
     public static final String CODING_TYPE = "UTF-8";
 
     FileMap(final String pathToFile, final String pathToContainsDir) {
         map = new HashMap<>();
         fil = new File(pathToFile + ".dat");
-        containsDir = new File(pathToContainsDir);
+        containingDir = new File(pathToContainsDir);
         name = pathToFile + ".dat";
         if (fil.exists()) {
             try {
                 getFile();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.exit(-1);
             }
         }
     }
@@ -103,7 +104,7 @@ public class FileMap {
                     buf.reset();
                 } else {
                     file.close();
-                    throw new Exception();
+                    throw new RuntimeException("Buffer is empty. Incorrect reading of file.");
                 }
             }
         } catch (IOException e) {
@@ -111,7 +112,7 @@ public class FileMap {
             e.printStackTrace();
             file.close();
             System.exit(-1);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             System.err.println("Wrong input file");
             e.printStackTrace();
             System.exit(-1);
@@ -128,7 +129,7 @@ public class FileMap {
 
     public void putFile() throws FileNotFoundException {
         try {
-            containsDir.mkdir();
+            containingDir.mkdir();
             fil.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
