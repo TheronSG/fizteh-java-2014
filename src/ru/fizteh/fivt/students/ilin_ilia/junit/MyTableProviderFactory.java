@@ -17,12 +17,7 @@ public class MyTableProviderFactory implements TableProviderFactory {
         if (dir == null) {
             throw  new IllegalArgumentException();
         }
-        try {
-            TableProvider table = new MyTableProvider(dir);
-            return table;
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
+            return new MyTableProvider(dir);
     }
 
     public boolean checkNameCorrection(final String name) {
