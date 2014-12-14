@@ -90,7 +90,7 @@ public class MyTable implements Table {
     @Override
     public String get(final String key) {
         if (key == null) {
-            throw new IllegalArgumentException("Can't get value. Empty key is impossible.");
+            throw new IllegalArgumentException("Can't get value. Empty key is permissible.");
         }
         if (changingFiles.containsKey(convertIntoHashRule(key))) {
             return changingFiles.get(convertIntoHashRule(key)).get(key);
@@ -150,11 +150,11 @@ public class MyTable implements Table {
 
     @Override
     public int size() {
-        int summ = 0;
+        int sum = 0;
         for (FileMap fileMap : changingFiles.values()) {
-            summ += fileMap.size();
+            sum += fileMap.size();
         }
-        return summ;
+        return sum;
     }
 
     @Override
