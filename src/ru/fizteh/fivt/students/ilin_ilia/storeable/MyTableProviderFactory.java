@@ -17,18 +17,11 @@ public class MyTableProviderFactory implements TableProviderFactory {
         if (dir == null) {
             throw  new IllegalArgumentException();
         }
+        TableProvider table = null;
         try {
-            TableProvider table = null;
-            try {
-                table = new MyTableProvider(dir);
-            } catch (ClassNotFoundException e) {
-                throw new IOException(e.getMessage());
-            } catch (ParseException e) {
-                throw new IOException(e.getMessage());
-            }
-            return table;
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            return new MyTableProvider(dir);
+        } catch (ClassNotFoundException | ParseException e) {
+            throw new IOException(e.getMessage());
         }
     }
 }
