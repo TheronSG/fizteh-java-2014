@@ -105,7 +105,7 @@ public class FileMap {
                     buf.reset();
                 } else {
                     file.close();
-                    throw new Exception();
+                    throw new RuntimeException("Buffer is empty. Incorrect reading of file.");
                 }
             }
         } catch (IOException e) {
@@ -113,7 +113,7 @@ public class FileMap {
             e.printStackTrace();
             file.close();
             System.exit(-1);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             System.err.println("Wrong input file");
             e.printStackTrace();
             System.exit(-1);
