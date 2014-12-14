@@ -240,6 +240,11 @@ public class StoreableMain {
                         int unsavedChanges = 0;
                         boolean isChanges = false;
                         if (workingTableProvider.getCurrentTable() != null) {
+                            if (workingTableProvider.getCurrentTable() ==
+                                    workingTableProvider.getTableProvider().getTable(arguments[0])) {
+                                System.out.println("Table has been already used.");
+                                return;
+                            }
                             MyTable myTable = (MyTable) workingTableProvider.getCurrentTable();
                             if (myTable.getNumberOfUncommittedChanges() != 0) {
                                 isChanges = true;
