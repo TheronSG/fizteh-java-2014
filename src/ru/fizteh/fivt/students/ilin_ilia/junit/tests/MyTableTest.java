@@ -3,9 +3,6 @@ package ru.fizteh.fivt.students.ilin_ilia.junit.tests;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
-
 import ru.fizteh.fivt.students.ilin_ilia.junit.MyTable;
 import ru.fizteh.fivt.students.ilin_ilia.junit.MyTableProvider;
 
@@ -13,6 +10,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class MyTableTest {
     private MyTableProvider myTableProvider;
@@ -40,6 +40,7 @@ public class MyTableTest {
     @Test
     public void removeNotExistedKeyTest() {
         myTable.put("k1", "1");
+        myTable.rollback();
         assertNull(myTable.remove("k1"));
     }
 
@@ -94,6 +95,7 @@ public class MyTableTest {
     @Test
     public void sizeNullTest2() {
         myTable.put("k1", "1");
+        myTable.rollback();
         assertEquals(myTable.size(), 0);
     }
 
