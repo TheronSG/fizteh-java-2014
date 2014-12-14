@@ -56,6 +56,7 @@ public class MyTableTest {
         values.add(1, 5);
         Storeable testStoreable = new MyStoreable(values, myTable);
         myTable.put("k1", testStoreable);
+        myTable.rollback();
         assertNull(myTable.remove("k1"));
     }
 
@@ -134,6 +135,7 @@ public class MyTableTest {
         values.add(1, 5);
         Storeable testStoreable = new MyStoreable(values, myTable);
         myTable.put("k1", testStoreable);
+        myTable.rollback();
         assertEquals(myTable.size(), 0);
     }
 
