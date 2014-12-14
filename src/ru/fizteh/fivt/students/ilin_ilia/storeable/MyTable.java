@@ -112,7 +112,7 @@ public class MyTable implements Table {
     @Override
     public Storeable get(final String key) {
         if (key == null) {
-            throw new IllegalArgumentException("Can't get value. Empty key is impossible.");
+            throw new IllegalArgumentException("Can't get value. Empty key is permissible.");
         }
         if (changingFiles.containsKey(convertIntoHashRule(key))) {
             return changingFiles.get(convertIntoHashRule(key)).get(key);
@@ -176,19 +176,20 @@ public class MyTable implements Table {
 
     @Override
     public int size() {
-        int summ = 0;
+        int sum = 0;
         for (FileMap fileMap : changingFiles.values()) {
-            summ += fileMap.size();
+            sum += fileMap.size();
         }
-        return summ;
+        return sum;
     }
 
     @Override
     public int commit() {
         inputFiles.clear();
-        for (Pair<Integer, Integer> key : changingFiles.keySet()) {
+        inputFiles = (HashMap<Pair<Integer, Integer>, FileMap>) changingFiles.clone();
+        /*for (Pair<Integer, Integer> key : changingFiles.keySet()) {
             inputFiles.put(key, changingFiles.get(key));
-        }
+        }*/
         changesAfterCommit = commitKeys.size();
         commitKeys.clear();
         return changesAfterCommit;
@@ -200,9 +201,10 @@ public class MyTable implements Table {
         changesAfterCommit = 0;
         commitKeys.clear();
         changingFiles.clear();
-        for (Pair<Integer, Integer> key : inputFiles.keySet()) {
+        changingFiles = (HashMap<Pair<Integer, Integer>, FileMap>) inputFiles.clone();
+        /*for (Pair<Integer, Integer> key : inputFiles.keySet()) {
             changingFiles.put(key, inputFiles.get(key));
-        }
+        }*/
         return returnValue;
     }
 
