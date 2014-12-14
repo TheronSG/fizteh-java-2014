@@ -160,9 +160,10 @@ public class MyTable implements Table {
     @Override
     public int commit() {
         inputFiles.clear();
-        for (Pair<Integer, Integer> key : changingFiles.keySet()) {
+        inputFiles = (HashMap<Pair<Integer, Integer>, FileMap>) changingFiles.clone();
+        /*for (Pair<Integer, Integer> key : changingFiles.keySet()) {
             inputFiles.put(key,changingFiles.get(key));
-        }
+        }*/
         changesAfterCommit = commitKeys.size();
         commitKeys.clear();
         return changesAfterCommit;
@@ -174,9 +175,10 @@ public class MyTable implements Table {
         changesAfterCommit = 0;
         commitKeys.clear();
         changingFiles.clear();
-        for (Pair<Integer, Integer> key : inputFiles.keySet()) {
+        changingFiles = (HashMap<Pair<Integer, Integer>, FileMap>) inputFiles.clone();
+        /*for (Pair<Integer, Integer> key : inputFiles.keySet()) {
             changingFiles.put(key, inputFiles.get(key));
-        }
+        }*/
         return returnValue;
     }
 
