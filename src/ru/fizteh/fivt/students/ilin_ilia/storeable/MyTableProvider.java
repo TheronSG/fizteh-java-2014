@@ -123,10 +123,12 @@ public class MyTableProvider implements TableProvider {
         if (value.substring(1, value.length() - 1).trim().equals("")) {
             throw new ParseException("Error! Empty value.", 1);
         }
+        boolean isNullString = false;
         String buff = "";
         List<String> parts = new LinkedList<>();
         value = value.substring(1, value.length() - 1);
         for (int index = 0; index < value.length(); index++) {
+            isNullString = false;
             while (index < value.length() && value.charAt(index) != ',') {
                 if (value.charAt(index) != '"') {
                     if (value.charAt(index) == ' ') {
@@ -140,9 +142,13 @@ public class MyTableProvider implements TableProvider {
                     while (value.charAt(index) != '"') {
                         buff += value.charAt(index);
                         index++;
+                        isNullString = true;
                     }
                     index++;
                 }
+            }
+            if (isNullString) {
+                buff += 'l';
             }
             parts.add(buff);
             buff = "";
@@ -152,11 +158,13 @@ public class MyTableProvider implements TableProvider {
             for (int i = 0; i < table.getColumnsCount(); i++) {
                 if (parts.get(i).equals("null")) {
                     storeable.setColumnAt(i, null);
+                } else if (parts.get(i).equals("nulll")) {
+                    storeable.setColumnAt(i, "null");
                 } else {
                     if (table.getColumnType(i) == Boolean.class) {
                         storeable.setColumnAt(i, Boolean.valueOf(parts.get(i)));
                     } else if (table.getColumnType(i) == String.class) {
-                        storeable.setColumnAt(i, parts.get(i));
+                        storeable.setColumnAt(i, parts.get(i).substring(0, parts.get(i).length() - 1));
                     } else if (table.getColumnType(i) == Integer.class) {
                         storeable.setColumnAt(i, Integer.valueOf(parts.get(i)));
                     } else if (table.getColumnType(i) == Long.class) {
@@ -194,7 +202,7 @@ public class MyTableProvider implements TableProvider {
         for (int index = 0; index < myStoreable.size(); index++) {
             if (value.getColumnAt(index) != null) {
                 if (table.getColumnType(index) == String.class) {
-                    resultString += "\"" + value.getStringAt(index) + "\",";
+                    resultString += "\"" + value.getStringAt(index) + "\", ";
                 } else {
                     resultString += value.getColumnAt(index).toString() + ", ";
                 }
@@ -237,5 +245,6 @@ public class MyTableProvider implements TableProvider {
             MyTable myTable = (MyTable) table;
             myTable.saveDB();
         }
+        System.out.println("All unsaved changes are roolled back.");
     }
 }
