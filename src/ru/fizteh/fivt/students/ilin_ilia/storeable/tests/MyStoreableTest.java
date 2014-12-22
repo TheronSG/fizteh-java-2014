@@ -4,9 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
-import ru.fizteh.fivt.students.ilin_ilia.storeable.MyStoreable;
-import ru.fizteh.fivt.students.ilin_ilia.storeable.MyTable;
-import ru.fizteh.fivt.students.ilin_ilia.storeable.MyTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.database.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +34,7 @@ public class MyStoreableTest {
     }
 
     @Test
-    public void setColumnAtWithoutExceptionTest() {
+    public void testSetColumnAtWithoutException() {
         boolean isException = false;
         try {
             myStoreable.setColumnAt(0, "No Exception");
@@ -51,31 +49,31 @@ public class MyStoreableTest {
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void setColumnAtIndexOutOfBoundExceptionTest() {
+    public void testSetColumnAtIndexOutOfBoundException() {
         myStoreable.setColumnAt(3, "No Exception");
     }
 
     @Test(expected = ColumnFormatException.class)
-    public void setColumnAtColumnFormatExceptionTest() {
+    public void testSetColumnAtColumnFormatException() {
         myStoreable.setColumnAt(1, "No Exception");
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void getColumnAtWithExceptionTest() {
+    public void testGetColumnAtWithException() {
         myStoreable.setColumnAt(0, "No Exception");
         myStoreable.setColumnAt(1, 42);
         myStoreable.getColumnAt(2);
     }
 
     @Test
-    public void getColumnAtWithoutExceptionTest() {
+    public void testGetColumnAtWithoutException() {
         myStoreable.setColumnAt(0, "No Exception");
         myStoreable.setColumnAt(1, 42);
         assertEquals(myStoreable.getColumnAt(1), 42);
     }
 
     @Test
-    public void getStringAtTest() {
+    public void testGetStringAt() {
         myStoreable.setColumnAt(0, "No Exception");
         myStoreable.setColumnAt(1, 42);
         assertEquals(myStoreable.getColumnAt(0), "No Exception");

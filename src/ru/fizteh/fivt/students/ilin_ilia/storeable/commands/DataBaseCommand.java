@@ -1,24 +1,31 @@
-package ru.fizteh.fivt.students.ilin_ilia.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.commands;
 
-import java.util.function.BiConsumer;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.utils.Utils;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.database.WorkingTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.dbexceptions.StopInterpretationException;
 
-public class Command {
+public class DataBaseCommand extends Command {
+
     private String name;
     private int argumentsAmount;
-    private BiConsumer<WorkingTableProvider, String[]> callback;
+    private LambdaFunction callback;
+    private WorkingTableProvider workingTableProvider;
 
-    public Command(final String name, final int argumentsAmount,
-                        final BiConsumer<WorkingTableProvider, String[]> callback) {
+    public DataBaseCommand(final String name, final int argumentsAmount,
+                           final WorkingTableProvider workingTableProvider,
+                   final LambdaFunction callback) {
         this.name = name;
         this.argumentsAmount = argumentsAmount;
         this.callback = callback;
+        this.workingTableProvider = workingTableProvider;
     }
 
     public String getName() {
         return name;
     }
 
-    public void execute(WorkingTableProvider workingTableProvider, String[] parameters) {
+    @Override
+    public void execute(Object object, String[] parameters) throws StopInterpretationException {
         /**
          * if argumentsAmount == -1 it means that function may have different amount of parameters.
          */

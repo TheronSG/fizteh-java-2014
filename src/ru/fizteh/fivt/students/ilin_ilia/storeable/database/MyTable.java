@@ -1,10 +1,11 @@
-package ru.fizteh.fivt.students.ilin_ilia.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.database;
 
-import javafx.util.Pair;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
 import ru.fizteh.fivt.storage.structured.TableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.utils.Utils;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.dbexceptions.TableException;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -20,26 +21,26 @@ public class MyTable implements Table {
     private List<String> commitKeys;
     /**
      * inputFiles contains files which have read from db and won't change after commit.
-     * changingFiles contains keys and values which will add during the programme.
+     * changingFiles contains keys and values which will add during the program.
      *
-     * At the beginning of the programme all of them contain the same keys and values.
+     * At the beginning of the program all of them contain the same keys and values.
      *
-     * isExists shows us file has been created before the programme or not.
+     * isExists shows us file has been created before the program or not.
      */
-    private HashMap<Pair<Integer, Integer>, FileMap> inputFiles;
-    private HashMap<Pair<Integer, Integer>, FileMap> changingFiles;
-    public static final String CODING_TYPE = "UTF-8";
+    private HashMap<DirFile, FileMap> inputFiles;
+    private HashMap<DirFile, FileMap> changingFiles;
+    public static final String ENCODING = "UTF-8";
     public static final int MAX_DIRECTORIES_AMOUNT  = 16;
     public static final int MAX_FILES_AMOUNT  = 16;
     private Class[] columnTypes;
     private boolean isExists;
     private TableProvider containsTableProvider;
     /**
-     * If there are some uncommitted changes and we stop the programme
+     * If there are some uncommitted changes and we stop the program
      * this flag shows if we have printed the message about uncommitted
      * changes.
      * It's false if we printed it or there is no uncommitted changes.
-     * isInvitated true in current table and only in it.
+     * isInvitated can be true only in current table.
      */
     private boolean isInvitated;
 
@@ -66,10 +67,10 @@ public class MyTable implements Table {
                     if (directory.isDirectory()) {
                         for (String file : directory.list()) {
                             String fileName = file.substring(0, file.length() - 4);
-                            Pair<Integer, Integer> pair = new Pair<>(Integer.parseInt(dir), Integer.parseInt(fileName));
-                            inputFiles.put(pair, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
+                            DirFile dirFile = new DirFile(Integer.parseInt(dir),Integer.parseInt(fileName));
+                            inputFiles.put(dirFile, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
                                     this.name.resolve(dir).toString(), this, containsTableProvider));
-                            changingFiles.put(pair, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
+                            changingFiles.put(dirFile, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
                                     this.name.resolve(dir).toString(), this, containsTableProvider));
                         }
                     }
@@ -86,22 +87,21 @@ public class MyTable implements Table {
             try {
                 curTable.mkdir();
             } catch (SecurityException e) {
-                System.err.println("Can't create the following directory: \"" + curTable.getName() + "\"");
+                throw new SecurityException("Can't create the following directory: \"" + curTable.getName() + "\"");
             }
         }
     }
 
-    public Pair<Integer, Integer> convertIntoHashRule(final String key) {
+    public DirFile convertIntoHashRule(final String key) {
         byte byt = 0;
         try {
-            byt = key.getBytes(CODING_TYPE)[0];
+            byt = key.getBytes(ENCODING)[0];
         } catch (UnsupportedEncodingException e) {
-            System.out.println("Can't decode key to UTF-8");
-            System.exit(-1);
+            throw new TableException("Can't decode key according to ENCODING.");
         }
         int ndir = byt % MAX_DIRECTORIES_AMOUNT;
         int nfile = (byt / MAX_FILES_AMOUNT) % MAX_FILES_AMOUNT;
-        return new Pair<>(ndir, nfile);
+        return new DirFile(ndir, nfile);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class MyTable implements Table {
     @Override
     public Storeable get(final String key) {
         if (key == null) {
-            throw new IllegalArgumentException("Can't get value. Empty key is permissible.");
+            throw new IllegalArgumentException("Can't get value. Empty key is not acceptable.");
         }
         if (changingFiles.containsKey(convertIntoHashRule(key))) {
             return changingFiles.get(convertIntoHashRule(key)).get(key);
@@ -129,10 +129,10 @@ public class MyTable implements Table {
         if (value == null) {
             throw new IllegalArgumentException("Can't put empty value.");
         }
-        Pair<Integer, Integer> pair = convertIntoHashRule(key);
-        if (changingFiles.containsKey(pair)) {
-            if (changingFiles.get(pair).containsKey(key)) {
-                if (!changingFiles.get(pair).get(key).equals(value)) {
+        DirFile dirFile = convertIntoHashRule(key);
+        if (changingFiles.containsKey(dirFile)) {
+            if (changingFiles.get(dirFile).containsKey(key)) {
+                if (!changingFiles.get(dirFile).get(key).equals(value)) {
                     if (!commitKeys.contains(key)) {
                         commitKeys.add(key);
                     }
@@ -142,19 +142,19 @@ public class MyTable implements Table {
                     commitKeys.add(key);
                 }
             }
-            return changingFiles.get(pair).put(key, value);
+            return changingFiles.get(dirFile).put(key, value);
         } else {
             if (!commitKeys.contains(key)) {
                 commitKeys.add(key);
             }
             try {
-                changingFiles.put(pair,
-                        new FileMap(name.resolve(pair.getKey().toString()).resolve(pair.getValue().toString()).toString(),
-                                name.resolve(pair.getKey().toString()).toString(), this, containsTableProvider));
+                changingFiles.put(dirFile,
+                        new FileMap(name.resolve(dirFile.getDir().toString()).resolve(dirFile.getFile().toString()).toString(),
+                                name.resolve(dirFile.getDir().toString()).toString(), this, containsTableProvider));
             } catch (ParseException e) {
                 throw new ColumnFormatException(e.getMessage());
             }
-            return changingFiles.get(pair).put(key, value);
+            return changingFiles.get(dirFile).put(key, value);
         }
     }
 
@@ -166,8 +166,8 @@ public class MyTable implements Table {
         if (!commitKeys.contains(key)) {
             commitKeys.remove(key);
         }
-        Pair<Integer, Integer> pair = convertIntoHashRule(key);
-        if (changingFiles.containsKey(pair)) {
+        DirFile dirFile =  convertIntoHashRule(key);
+        if (changingFiles.containsKey(dirFile)) {
             return changingFiles.get(convertIntoHashRule(key)).remove(key);
         } else {
             return null;
@@ -186,10 +186,7 @@ public class MyTable implements Table {
     @Override
     public int commit() {
         inputFiles.clear();
-        inputFiles = (HashMap<Pair<Integer, Integer>, FileMap>) changingFiles.clone();
-        /*for (Pair<Integer, Integer> key : changingFiles.keySet()) {
-            inputFiles.put(key, changingFiles.get(key));
-        }*/
+        inputFiles = (HashMap<DirFile, FileMap>) changingFiles.clone();
         changesAfterCommit = commitKeys.size();
         commitKeys.clear();
         return changesAfterCommit;
@@ -201,10 +198,7 @@ public class MyTable implements Table {
         changesAfterCommit = 0;
         commitKeys.clear();
         changingFiles.clear();
-        changingFiles = (HashMap<Pair<Integer, Integer>, FileMap>) inputFiles.clone();
-        /*for (Pair<Integer, Integer> key : inputFiles.keySet()) {
-            changingFiles.put(key, inputFiles.get(key));
-        }*/
+        changingFiles = (HashMap<DirFile, FileMap>) inputFiles.clone();
         return returnValue;
     }
 
@@ -245,10 +239,10 @@ public class MyTable implements Table {
                 RandomAccessFile fileSignature = new RandomAccessFile(signature, "rw");
                 int count = 0;
                 for (Class<?> clas : columnTypes) {
-                    fileSignature.write((clas.toString()).getBytes(CODING_TYPE));
+                    fileSignature.write((clas.toString()).getBytes(ENCODING));
                     count++;
                     if (count != columnTypes.length) {
-                        fileSignature.write(" ".getBytes(CODING_TYPE));
+                        fileSignature.write(" ".getBytes(ENCODING));
                     }
                 }
                 fileSignature.close();
@@ -257,14 +251,10 @@ public class MyTable implements Table {
             }
         }
         for (FileMap fileMap : inputFiles.values()) {
-            try {
-                fileMap.putFile();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+                fileMap.dumpDataToFile();
         }
         if(commitKeys.size() != 0 && isInvitated) {
-            System.err.println(commitKeys.size() + " unsaved changes");
+            throw new TableException(commitKeys.size() + " unsaved changes");
         }
     }
     public void readDB() throws IOException, ClassNotFoundException {

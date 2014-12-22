@@ -1,9 +1,10 @@
-package ru.fizteh.fivt.students.ilin_ilia.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.database;
 
 
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
 import ru.fizteh.fivt.storage.structured.TableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.dbexceptions.FileMapIOException;
 
 import java.io.*;
 import java.text.ParseException;
@@ -13,25 +14,25 @@ public class FileMap {
     private Map<String, Storeable> map;
     Map<String, String> mapString;
     private String name;
-    private File fil;
-    private File containsDir;
-    private Table containsTable;
+    private File dbFile;
+    private File dbRootDir;
+    private Table containingTable;
     private TableProvider containsTableProvider;
-    public static final String CODING_TYPE = "UTF-8";
+    public static final String ENCODING = "UTF-8";
 
-    FileMap(final String pathToFile, final String pathToContainsDir, Table table, TableProvider tableProvider) throws ParseException {
-        containsTable = table;
+    FileMap(final String pathToFile, final String pathToContainingDir, Table table, TableProvider tableProvider) throws ParseException {
+        containingTable = table;
         containsTableProvider = tableProvider;
         map = new HashMap<>();
-        mapString = new HashMap<>();
-        fil = new File(pathToFile + ".dat");
-        containsDir = new File(pathToContainsDir);
         name = pathToFile + ".dat";
-        if (fil.exists()) {
+        mapString = new HashMap<>();
+        dbFile = new File(name);
+        dbRootDir = new File(pathToContainingDir);
+        if (dbFile.exists()) {
             try {
-                getFile();
+                loadDataFromFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new FileMapIOException(e.getMessage());
             }
         }
     }
@@ -54,18 +55,18 @@ public class FileMap {
 
     public void exit() throws IOException {
         try {
-            fil.createNewFile();
+            dbFile.createNewFile();
         } catch (SecurityException e) {
-            System.err.println("Can't create the following file: \"" + fil.getName() + "\"");
+            throw new FileMapIOException("Can't create the following file: \"" + dbFile.getName() + "\"");
         }
-        putFile();
+        dumpDataToFile();
     }
 
     public void delete() {
         new File(name).delete();
     }
 
-    public void getFile() throws IOException, ParseException {
+    public void loadDataFromFile() throws IOException, ParseException {
         RandomAccessFile file = new RandomAccessFile(name, "rw");
         if (file.length() == 0) {
             file.close();
@@ -89,7 +90,7 @@ public class FileMap {
                 offsets.add(file.readInt());
             }
             bytesCounter += 4;
-            keys.add((buf.toString(CODING_TYPE)));
+            keys.add((buf.toString(ENCODING)));
             buf.reset();
         } while (bytesCounter < off);
         try {
@@ -101,60 +102,52 @@ public class FileMap {
                     bytesCounter++;
                 }
                 if (buf.size() > 0) {
-                    mapString.put(keyIter.next(), buf.toString(CODING_TYPE));
+                    mapString.put(keyIter.next(), buf.toString(ENCODING));
                     buf.reset();
                 } else {
                     file.close();
-                    throw new RuntimeException("Buffer is empty. Incorrect reading of file.");
+                    throw new FileMapIOException("Buffer is empty. Incorrect reading of file.");
                 }
             }
         } catch (IOException e) {
-            System.err.println("Can't read db file");
-            e.printStackTrace();
             file.close();
-            System.exit(-1);
-        } catch (RuntimeException e) {
-            System.err.println("Wrong input file");
-            e.printStackTrace();
-            System.exit(-1);
+            throw new FileMapIOException("Can't read db file. Reason:" + e.getMessage());
         }
         try {
             buf.close();
             file.close();
         } catch (IOException e) {
-            System.err.println("Can't close db file");
-            e.printStackTrace();
-            System.exit(-1);
+            throw new FileMapIOException("Can't close db file");
         }
         for (String key : mapString.keySet()) {
-            map.put(key, containsTableProvider.deserialize(containsTable, mapString.get(key)));
+            map.put(key, containsTableProvider.deserialize(containingTable, mapString.get(key)));
         }
         mapString.clear();
     }
 
-    public void putFile() throws FileNotFoundException {
+    public void dumpDataToFile() throws FileNotFoundException {
         try {
-            containsDir.mkdir();
-            fil.createNewFile();
+            dbRootDir.mkdir();
+            dbFile.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new FileMapIOException(e.getMessage());
         }
         RandomAccessFile file = new RandomAccessFile(name, "rw");
         for (String key : map.keySet()) {
-            mapString.put(key, containsTableProvider.serialize(containsTable, map.get(key)));
+            mapString.put(key, containsTableProvider.serialize(containingTable, map.get(key)));
         }
         try {
             if (mapString.size() == 0) {
                 file.close();
                 new File(name).delete();
-                new File(containsDir.toString()).delete();
+                new File(dbRootDir.toString()).delete();
                 return;
             }
             file.setLength(0);
             Set<String> keys = mapString.keySet();
             List<Integer> offsetsPos = new LinkedList<>();
             for (String cur : keys) {
-                file.write(cur.getBytes(CODING_TYPE));
+                file.write(cur.getBytes(ENCODING));
                 file.write('\0');
                 offsetsPos.add(((int) file.getFilePointer()));
                 file.writeInt(0);
@@ -162,7 +155,7 @@ public class FileMap {
             List<Integer> offsets = new LinkedList<>();
             for (String cur : keys) {
                 offsets.add((int) file.getFilePointer());
-                file.write(mapString.get(cur).getBytes(CODING_TYPE));
+                file.write(mapString.get(cur).getBytes(ENCODING));
             }
             Iterator<Integer> offIter = offsets.iterator();
             for (int pos :offsetsPos) {
@@ -171,9 +164,7 @@ public class FileMap {
             }
             file.close();
         } catch (IOException e) {
-            System.err.println("Can't write into a db file");
-            e.printStackTrace();
-            System.exit(-1);
+            throw new FileMapIOException("Can't write into a db file");
         }
     }
 
@@ -186,7 +177,7 @@ public class FileMap {
     }
 
     public Table getContainsTable() {
-        return  containsTable;
+        return  containingTable;
     }
 
     public int size() {

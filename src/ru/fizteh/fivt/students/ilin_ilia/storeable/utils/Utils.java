@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.ilin_ilia.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public class Utils {
 
     public static String[] findAll(String regexp, String text) {
         Matcher matcher = Pattern.compile(regexp).matcher(text);
-        List<String> occurences = new ArrayList<String>();
+        List<String> occurences = new ArrayList<>();
         while (matcher.find()) {
             occurences.add(matcher.group());
         }

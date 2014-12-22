@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.ilin_ilia.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.database;
 
 import ru.fizteh.fivt.storage.structured.Table;
 import ru.fizteh.fivt.storage.structured.TableProvider;
@@ -11,6 +11,11 @@ public class WorkingTableProvider {
         this.tableProvider = tableProvider;
         currentTable = null;
     }
+
+    public WorkingTableProvider() {
+        // Only for tests.
+    }
+
     public void setCurrentTable(Table table) {
         currentTable = table;
     }

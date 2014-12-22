@@ -1,4 +1,4 @@
-package ru.fizteh.fivt.students.ilin_ilia.storeable;
+package ru.fizteh.fivt.students.ilin_ilia.storeable.database;
 
 
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
@@ -34,7 +34,7 @@ public class MyStoreable implements Storeable {
         if (value != null) {
             if (value.getClass() != containsTable.getColumnType(columnIndex)) {
                 throw new ColumnFormatException("Types mismatching in method setColumnAt.");
-            } else if (columnIndex > 6) {
+            } else if (columnIndex > keys.length) {
                 throw new IndexOutOfBoundsException("Wrong index.");
             } else {
                 keys[columnIndex] = value;
@@ -47,7 +47,7 @@ public class MyStoreable implements Storeable {
 
     @Override
     public Object getColumnAt(int columnIndex) throws IndexOutOfBoundsException {
-        if (columnIndex > 6) {
+        if (columnIndex > keys.length) {
             throw new IndexOutOfBoundsException("Wrong index.");
         } else {
             return keys[columnIndex];
@@ -56,79 +56,37 @@ public class MyStoreable implements Storeable {
 
     @Override
     public Integer getIntAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (containsTable.getColumnType(columnIndex) != Integer.class) {
-            throw new ColumnFormatException("Types mismatching in method getIntAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
-        } else {
-            return (Integer) keys[columnIndex];
-        }
+        return Integer.class.cast(getColumnAt(columnIndex));
     }
 
     @Override
     public Long getLongAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (containsTable.getColumnType(columnIndex) != Long.class) {
-            throw new ColumnFormatException("Types mismatching in method getIntAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
-        } else {
-            return (Long) keys[columnIndex];
-        }
+        return Long.class.cast(getColumnAt(columnIndex));
     }
 
     @Override
     public Byte getByteAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (containsTable.getColumnType(columnIndex) != Byte.class) {
-            throw new ColumnFormatException("Types mismatching in method getIntAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
-        } else {
-            return (Byte) keys[columnIndex];
-        }
+        return Byte.class.cast(getColumnAt(columnIndex));
     }
 
     @Override
     public Float getFloatAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (containsTable.getColumnType(columnIndex) != Float.class) {
-            throw new ColumnFormatException("Types mismatching in method getIntAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
-        } else {
-            return (Float) keys[columnIndex];
-        }
+        return Float.class.cast(getColumnAt(columnIndex));
     }
 
     @Override
     public Double getDoubleAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (containsTable.getColumnType(columnIndex) != Double.class) {
-            throw new ColumnFormatException("Types mismatching in method getDoubleAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
-        } else {
-            return (Double) keys[columnIndex];
-        }
+        return Double.class.cast(getColumnAt(columnIndex));
     }
 
     @Override
     public Boolean getBooleanAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (containsTable.getColumnType(columnIndex) != Boolean.class) {
-            throw new ColumnFormatException("Types mismatching in method getBooleanAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
-        } else {
-            return (Boolean) keys[columnIndex];
-        }
+        return Boolean.class.cast(getColumnAt(columnIndex));
     }
 
     @Override
     public String getStringAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
-        if (containsTable.getColumnType(columnIndex) != String.class) {
-            throw new ColumnFormatException("Types mismatching in method getStringAt.");
-        } else if (columnIndex > 6) {
-            throw new IndexOutOfBoundsException("Wrong index.");
-        } else {
-            return (String) keys[columnIndex];
-        }
+        return String.class.cast(getColumnAt(columnIndex));
     }
 
     public boolean equals(Storeable store) {

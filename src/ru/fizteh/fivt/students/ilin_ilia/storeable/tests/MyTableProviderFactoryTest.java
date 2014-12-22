@@ -2,7 +2,7 @@ package ru.fizteh.fivt.students.ilin_ilia.storeable.tests;
 
 import org.junit.After;
 import org.junit.Test;
-import ru.fizteh.fivt.students.ilin_ilia.storeable.MyTableProviderFactory;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.database.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,7 +15,7 @@ public class MyTableProviderFactoryTest {
     Path testDir = Paths.get(System.getProperty("java.io.tmpdir"));
 
     @Test(expected = IllegalArgumentException.class)
-    public void createNullMyTableProvider() {
+    public void testCreateNullMyTableProvider() {
         myTableProviderFactory = new MyTableProviderFactory();
         try {
             myTableProviderFactory.create(null);
@@ -24,7 +24,7 @@ public class MyTableProviderFactoryTest {
         }
     }
     @Test
-    public void createNotNullMyTableProvider() {
+    public void testCreateNotNullMyTableProvider() {
         myTableProviderFactory = new MyTableProviderFactory();
         try {
             myTableProviderFactory.create("DbTest");

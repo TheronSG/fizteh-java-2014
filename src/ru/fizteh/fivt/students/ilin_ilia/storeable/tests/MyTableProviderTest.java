@@ -7,8 +7,7 @@ import org.junit.Test;
 import ru.fizteh.fivt.storage.structured.ColumnFormatException;
 import ru.fizteh.fivt.storage.structured.Storeable;
 import ru.fizteh.fivt.storage.structured.Table;
-import ru.fizteh.fivt.students.ilin_ilia.storeable.MyStoreable;
-import ru.fizteh.fivt.students.ilin_ilia.storeable.MyTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.storeable.database.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,12 +33,12 @@ public class MyTableProviderTest {
     }
 
    @Test(expected = IllegalArgumentException.class)
-    public void createNullTableTest() throws IOException {
+    public void testCreateNullTable() throws IOException {
         myTableProvider.createTable(null, new LinkedList<Class<?>>());
     }
 
     @Test
-    public void createNotNullTableTest() throws IOException {
+    public void testCreateNotNullTable() throws IOException {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Byte.class);
@@ -48,17 +47,17 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void getNotExistsTableTest() {
+    public void testGetNotExistsTable() {
         assertNull(myTableProvider.getTable("NotExistsTable"));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void getNullTableTest() {
+    public void testGetNullTable() {
         myTableProvider.getTable(null);
     }
 
     @Test
-    public void getExistsTableTest() throws IOException {
+    public void testGetExistsTable() throws IOException {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Byte.class);
@@ -67,17 +66,17 @@ public class MyTableProviderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void removeNullTableTest() {
+    public void testRemoveNullTable() {
         myTableProvider.removeTable(null);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void removeNotExistsTableTest() {
+    public void testRemoveNotExistsTable() {
         myTableProvider.removeTable("NotExistsTable");
     }
 
     @Test
-    public void removeExistsTableTest() throws IOException {
+    public void testRemoveExistsTable() throws IOException {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Integer.class);
@@ -87,7 +86,7 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void deserializeTrueTest() {
+    public void testDeserializeTrue() {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Byte.class);
@@ -105,7 +104,7 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void deserializeFalseTest() {
+    public void testDeserializeFalse() {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Boolean.class);
@@ -123,7 +122,7 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void serializeTrueTest() {
+    public void testSerializeTrue() {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(String.class);
@@ -147,7 +146,7 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void serializeFalseTest() {
+    public void testSerializeFalse() {
         List<Class<?>> list1 = new LinkedList<>();
         List<Class<?>> list2 = new LinkedList<>();
         list1.add(String.class);
@@ -177,7 +176,7 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void createForShortConstructorTest() throws IOException {
+    public void testCreateForShortConstructor() throws IOException {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Integer.class);
@@ -186,7 +185,7 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void createForLongConstructorTrueTest() throws IOException {
+    public void testCreateForLongConstructorTrue() throws IOException {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Integer.class);
@@ -198,7 +197,7 @@ public class MyTableProviderTest {
     }
 
     @Test(expected = ColumnFormatException.class)
-    public void createForLongConstructorFalseTest() throws IOException {
+    public void testCreateForLongConstructorFalse() throws IOException {
         List<Class<?>> list1 = new LinkedList<>();
         list1.add(String.class);
         list1.add(Integer.class);
@@ -210,7 +209,7 @@ public class MyTableProviderTest {
     }
 
     @Test
-    public void getTableNamesTest() throws IOException {
+    public void testGetTableNames() throws IOException {
         List<Class<?>> list = new LinkedList<>();
         list.add(String.class);
         list.add(Integer.class);
