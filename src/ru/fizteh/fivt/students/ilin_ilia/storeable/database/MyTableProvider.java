@@ -33,8 +33,8 @@
                 try {
                     curTableProvider.mkdir();
                 } catch (SecurityException e) {
-                    throw new TableException("Can't create the following directory: \"" +
-                            curTableProvider.getName() + "\"");
+                    throw new TableException("Can't create the following directory: \""
+                            + curTableProvider.getName() + "\"");
                 }
             }
         }
@@ -55,7 +55,8 @@
             if (name == null) {
                 throw new IllegalArgumentException("Can't create table. Empty name is impossible for it.");
             } else if (!checkNameCorrection(name)) {
-                throw new IllegalArgumentException("Can't create table. " + "\"" + name + "\" has inadmissible symbols");
+                throw new IllegalArgumentException("Can't create table. "
+                        + "\"" + name + "\" has inadmissible symbols");
             } else {
                 if (tables.containsKey(name)) {
                     return null;
@@ -79,7 +80,8 @@
             if (name == null) {
                 throw new IllegalArgumentException("Can't remove table. Empty name is impossible for it.");
             } else if (!checkNameCorrection(name)) {
-                throw new IllegalArgumentException("Can't remove table. " + "\"" + name + "\" has inadmissible symbols");
+                throw new IllegalArgumentException("Can't remove table. "
+                        + "\"" + name + "\" has inadmissible symbols");
             } else {
                 if (!new File(currentFactory.resolve(name).toString()).exists()) {
                     throw new IllegalStateException(name + " not exists");
@@ -191,7 +193,8 @@
             for (int i = 0; i < myValue.size(); i++) {
                 if (value.getColumnAt(i) != null) {
                     if (value.getColumnAt(i).getClass() != table.getColumnType(i)) {
-                        throw new ColumnFormatException("\"" + i + "\" column doesn't match the column format of the table \""
+                        throw new ColumnFormatException("\"" + i
+                                + "\" column doesn't match the column format of the table \""
                                 + table.getName() + "\"");
                     }
                 }
@@ -220,7 +223,8 @@
         }
 
         @Override
-        public Storeable createFor(Table table, List<?> values) throws ColumnFormatException, IndexOutOfBoundsException {
+        public Storeable createFor(Table table, List<?> values)
+                throws ColumnFormatException, IndexOutOfBoundsException {
             return new MyStoreable(values, table);
         }
 
