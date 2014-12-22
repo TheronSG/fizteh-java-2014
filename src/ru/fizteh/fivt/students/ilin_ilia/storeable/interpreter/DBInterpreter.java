@@ -14,7 +14,8 @@ public class DBInterpreter extends Interpreter {
         this.workingTableProvider = workingTableProvider;
     }
 
-    public DBInterpreter (WorkingTableProvider workingTableProvider, Command[] commands, InputStream in, PrintStream out) {
+    public DBInterpreter(WorkingTableProvider workingTableProvider,
+                         Command[] commands, InputStream in, PrintStream out) {
         super(commands, in, out);
         this.workingTableProvider = workingTableProvider;
     }
