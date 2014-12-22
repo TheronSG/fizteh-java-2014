@@ -43,7 +43,7 @@ public class MyStoreableTest {
         } catch (Exception e) {
             isException = true;
         }
-        if(isException) {
+        if (isException) {
             assertTrue(false);
         }
     }
