@@ -40,8 +40,7 @@ public class StoreableMain {
             run(workingTableProvider, args);
         } catch (TableException e) {
             System.err.println(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
         }
@@ -144,7 +143,7 @@ public class StoreableMain {
                         if (arguments[1].charAt(0) != '(') {
                             throw new IllegalArgumentException("Wrong data format! \'(\' is missed.");
                         }
-                        if (arguments[arguments.length - 1].charAt(arguments[arguments.length - 1].length() -1)
+                        if (arguments[arguments.length - 1].charAt(arguments[arguments.length - 1].length() - 1)
                                 != ')') {
                             throw new IllegalArgumentException("Wrong data format! \')\' is missed.");
                         }
@@ -215,7 +214,8 @@ public class StoreableMain {
                         e.printStackTrace();
                     }
                 }),
-                new DataBaseCommand("rollback", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("rollback", 0, workingTableProvider,
+                        (LambdaFunction<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                     if (workingTableProvider.getCurrentTable() != null) {
                         System.out.println("rollback");
@@ -229,8 +229,8 @@ public class StoreableMain {
                     int unsavedChanges = 0;
                     boolean isChanges = false;
                     if (workingTableProvider.getCurrentTable() != null) {
-                        if (workingTableProvider.getCurrentTable() ==
-                                workingTableProvider.getTableProvider().getTable(arguments[0])) {
+                        if (workingTableProvider.getCurrentTable()
+                                == workingTableProvider.getTableProvider().getTable(arguments[0])) {
                             System.out.println("Table has been already used.");
                             return;
                         }
@@ -253,7 +253,8 @@ public class StoreableMain {
                         System.err.println(unsavedChanges + " unsaved changes");
                     }
                 }),
-                new DataBaseCommand("show tables", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("show tables", 0, workingTableProvider,
+                        (LambdaFunction<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                     MyTableProvider myTableProvider = (MyTableProvider) workingTableProvider.getTableProvider();
                     List<String> tableList = myTableProvider.getTableNames();
