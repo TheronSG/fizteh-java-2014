@@ -11,7 +11,7 @@ public class DirFile {
         this.file = file;
     }
 
-    public void setDirAndFile (Integer dir, Integer file) {
+    public void setDirAndFile(Integer dir, Integer file) {
         this.dir = dir;
         this.file = file;
     }
@@ -19,16 +19,13 @@ public class DirFile {
 
 
     @Override
-    public boolean equals (Object object) {
-        if (object instanceof DirFile && Objects.equals(((DirFile) object).getDir(), dir) && ((DirFile)object).getFile() == file) {
-            return true;
-        } else {
-            return false;
-        }
+    public boolean equals(Object object) {
+        return object instanceof DirFile && Objects.equals(((DirFile) object).getDir(), dir)
+                && Objects.equals(((DirFile) object).getFile(), file);
     }
 
     @Override
-    public int hashCode () {
+    public int hashCode() {
         return dir * 1000 + file;
     }
 
