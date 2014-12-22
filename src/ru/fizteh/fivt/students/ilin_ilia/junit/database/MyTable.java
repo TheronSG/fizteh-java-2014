@@ -125,7 +125,8 @@ public class MyTable implements Table {
                 commitKeys.add(key);
             }
             changingFiles.put(dirFile,
-                    new FileMap(name.resolve(dirFile.getDir().toString()).resolve(dirFile.getFile().toString()).toString(),
+                    new FileMap(name.resolve(dirFile.getDir().toString()).
+                            resolve(dirFile.getFile().toString()).toString(),
                             name.resolve(dirFile.getDir().toString()).toString()));
             return changingFiles.get(dirFile).put(key, value);
         }
@@ -195,7 +196,7 @@ public class MyTable implements Table {
                 e.printStackTrace();
             }
         }
-        if(commitKeys.size() != 0 && isInvitated) {
+        if (commitKeys.size() != 0 && isInvitated) {
             throw new TableException(commitKeys.size() + " unsaved changes");
         }
     }
