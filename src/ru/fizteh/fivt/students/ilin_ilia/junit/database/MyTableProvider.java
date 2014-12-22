@@ -1,7 +1,8 @@
-package ru.fizteh.fivt.students.ilin_ilia.junit;
+package ru.fizteh.fivt.students.ilin_ilia.junit.database;
 
 import ru.fizteh.fivt.storage.strings.Table;
 import ru.fizteh.fivt.storage.strings.TableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.junit.dbexceptions.TableException;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 
 
 public class MyTableProvider implements TableProvider {
+    private static final String PROHIBITED_SYMBOLS = "[~#@*+%{}<>\\[\\]\"_^]?/:*|";
     private Map<String, Table> tables;
     private Path currentFactory;
 
@@ -27,7 +29,8 @@ public class MyTableProvider implements TableProvider {
             try {
                 curTableProvider.mkdir();
             } catch (SecurityException e) {
-                System.err.println("Can't create the following directory: \"" + curTableProvider.getName() + "\"");
+                throw new TableException("Can't create the following directory: \"" +
+                        curTableProvider.getName() + "\"");
             }
         }
     }
@@ -95,7 +98,7 @@ public class MyTableProvider implements TableProvider {
     }
 
     public boolean checkNameCorrection(final String name) {
-        Matcher matcher = Pattern.compile("[~#@*+%{}<>\\[\\]\"\\_^]?/:*|").matcher(name);
+        Matcher matcher = Pattern.compile(PROHIBITED_SYMBOLS).matcher(name);
         return matcher.find();
     }
 
@@ -113,5 +116,6 @@ public class MyTableProvider implements TableProvider {
             MyTable myTable = (MyTable) table;
             myTable.saveDB();
         }
+        System.out.println("All unsaved changes are rolled back.");
     }
 }

@@ -1,36 +1,28 @@
-package ru.fizteh.fivt.students.ilin_ilia.junit;
+package ru.fizteh.fivt.students.ilin_ilia.junit.database;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
+import ru.fizteh.fivt.students.ilin_ilia.junit.dbexceptions.FileMapIOException;
+
+import java.io.*;
+import java.util.*;
 
 public class FileMap {
     private Map<String, String> map;
     private String name;
-    private File fil;
-    private File containingDir;
-    public static final String CODING_TYPE = "UTF-8";
+    private File dbFile;
+    private File dbRootDir;
+    public static final String ENCODING = "UTF-8";
 
-    FileMap(final String pathToFile, final String pathToContainsDir) {
+    FileMap(final String pathToFile, final String pathToContainingDir) {
         map = new HashMap<>();
-        fil = new File(pathToFile + ".dat");
-        containingDir = new File(pathToContainsDir);
         name = pathToFile + ".dat";
-        if (fil.exists()) {
+        dbFile = new File(name);
+        dbRootDir = new File(pathToContainingDir);
+        if (dbFile.exists()) {
             try {
-                getFile();
+                loadDataFromFile();
             } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(-1);
+                throw new FileMapIOException(e.getMessage());
             }
         }
     }
@@ -53,18 +45,18 @@ public class FileMap {
 
     public void exit() throws IOException {
         try {
-            fil.createNewFile();
+            dbFile.createNewFile();
         } catch (SecurityException e) {
-            System.err.println("Can't create the following file: \"" + fil.getName() + "\"");
+            throw new FileMapIOException("Can't create the following file: \"" + dbFile.getName() + "\"");
         }
-        putFile();
+        dumpDataToFile();
     }
 
     public void delete() {
         new File(name).delete();
     }
 
-    public void getFile() throws IOException {
+    public void loadDataFromFile() throws IOException {
         RandomAccessFile file = new RandomAccessFile(name, "rw");
         if (file.length() == 0) {
             file.close();
@@ -88,7 +80,7 @@ public class FileMap {
                 offsets.add(file.readInt());
             }
             bytesCounter += 4;
-            keys.add((buf.toString(CODING_TYPE)));
+            keys.add((buf.toString(ENCODING)));
             buf.reset();
         } while (bytesCounter < off);
         try {
@@ -100,39 +92,31 @@ public class FileMap {
                     bytesCounter++;
                 }
                 if (buf.size() > 0) {
-                    map.put(keyIter.next(), buf.toString(CODING_TYPE));
+                    map.put(keyIter.next(), buf.toString(ENCODING));
                     buf.reset();
                 } else {
                     file.close();
-                    throw new RuntimeException("Buffer is empty. Incorrect reading of file.");
+                    throw new FileMapIOException("Buffer is empty. Incorrect reading of file.");
                 }
             }
         } catch (IOException e) {
-            System.err.println("Can't read db file");
-            e.printStackTrace();
             file.close();
-            System.exit(-1);
-        } catch (RuntimeException e) {
-            System.err.println("Wrong input file");
-            e.printStackTrace();
-            System.exit(-1);
+            throw new FileMapIOException("Can't read db file. Reason:" + e.getMessage());
         }
         try {
             buf.close();
             file.close();
         } catch (IOException e) {
-            System.err.println("Can't close db file");
-            e.printStackTrace();
-            System.exit(-1);
+            throw new FileMapIOException("Can't close db file");
         }
     }
 
-    public void putFile() throws FileNotFoundException {
+    public void dumpDataToFile() throws FileNotFoundException {
         try {
-            containingDir.mkdir();
-            fil.createNewFile();
+            dbRootDir.mkdir();
+            dbFile.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new FileMapIOException(e.getMessage());
         }
         RandomAccessFile file = new RandomAccessFile(name, "rw");
         try {
@@ -145,7 +129,7 @@ public class FileMap {
             Set<String> keys = map.keySet();
             List<Integer> offsetsPos = new LinkedList<>();
             for (String cur : keys) {
-                file.write(cur.getBytes(CODING_TYPE));
+                file.write(cur.getBytes(ENCODING));
                 file.write('\0');
                 offsetsPos.add(((int) file.getFilePointer()));
                 file.writeInt(0);
@@ -153,7 +137,7 @@ public class FileMap {
             List<Integer> offsets = new LinkedList<>();
             for (String cur : keys) {
                 offsets.add((int) file.getFilePointer());
-                file.write(map.get(cur).getBytes(CODING_TYPE));
+                file.write(map.get(cur).getBytes(ENCODING));
             }
             Iterator<Integer> offIter = offsets.iterator();
             for (int pos :offsetsPos) {
@@ -162,9 +146,7 @@ public class FileMap {
             }
             file.close();
         } catch (IOException e) {
-            System.err.println("Can't write into a db file");
-            e.printStackTrace();
-            System.exit(-1);
+            throw new FileMapIOException("Can't write into a db file");
         }
     }
 

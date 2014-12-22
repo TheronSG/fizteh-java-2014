@@ -2,13 +2,12 @@ package ru.fizteh.fivt.students.ilin_ilia.junit.tests;
 
 import org.junit.After;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import ru.fizteh.fivt.students.ilin_ilia.junit.MyTableProviderFactory;
+import ru.fizteh.fivt.students.ilin_ilia.junit.database.MyTableProviderFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static org.junit.Assert.assertTrue;
 
 public class MyTableProviderFactoryTest {
     private MyTableProviderFactory myTableProviderFactory;

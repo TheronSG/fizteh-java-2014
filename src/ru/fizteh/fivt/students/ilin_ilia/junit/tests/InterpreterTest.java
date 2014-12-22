@@ -1,31 +1,62 @@
 package ru.fizteh.fivt.students.ilin_ilia.junit.tests;
 
+import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
+import ru.fizteh.fivt.students.ilin_ilia.junit.commands.DataBaseCommand;
+import ru.fizteh.fivt.students.ilin_ilia.junit.commands.LambdaFunction;
+import ru.fizteh.fivt.students.ilin_ilia.junit.database.WorkingTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.junit.dbexceptions.StopInterpretationException;
+import ru.fizteh.fivt.students.ilin_ilia.junit.interpreter.DBInterpreter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
-import java.util.function.BiConsumer;
 
-import ru.fizteh.fivt.students.ilin_ilia.junit.*;
+import static org.junit.Assert.assertEquals;
 
 public class InterpreterTest {
-    private Interpreter interpreter;
+    private DBInterpreter dbInterpreter;
+    private final String newLine = System.getProperty("line.separator");
+    private final String testCommand = "test";
+    private final String testOutput = "TEST";
+    private ByteArrayOutputStream outputStream;
+    private PrintStream printStream;
+    private LambdaFunction<Object, String[]> printerCommand = (object, arguments)
+            -> printStream.println(testOutput);
+
+    @Before
+    public void beforeTest() {
+        outputStream = new ByteArrayOutputStream();
+        printStream = new PrintStream(outputStream);
+    }
+
 
     @Test
-    public void test() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final PrintStream ps = new PrintStream(baos);
-        interpreter = new Interpreter(new WorkingTableProvider(null), new Command[]{
-                new Command("test", 0, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
-                        ps.print("TEST\n");
-                    }
-                })}, new ByteArrayInputStream("test".getBytes()), ps);
-        interpreter.run(new String[]{});
-        assertEquals("$ TEST\n$ ", baos.toString());
+    public void interactiveTest1() {
+        final PrintStream ps = new PrintStream(outputStream);
+
+        dbInterpreter = new DBInterpreter(new WorkingTableProvider(null), new DataBaseCommand[]{
+                new DataBaseCommand("test", 0, new WorkingTableProvider(),
+                        (workingTableProvider, arguments) -> {
+                            ps.print(testOutput + newLine);
+                        })}, new ByteArrayInputStream(testCommand.getBytes()), ps);
+        dbInterpreter.run(new String[]{});
+        assertEquals("$ " + testOutput + newLine + "$ ", outputStream.toString());
+    }
+
+    @Test(expected = StopInterpretationException.class)
+    public void batchTest1() throws IOException, StopInterpretationException {
+        dbInterpreter = new DBInterpreter(null, new DataBaseCommand[]{
+                new DataBaseCommand("exit", 0, new WorkingTableProvider(),
+                        (workingTableProvider, arguments) -> {
+                            throw new StopInterpretationException();
+                        })});
+        dbInterpreter.batchMode(new String[]{"exit"});
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInterpreterThrowsExceptionConstructedForNullStream() {
+        new DBInterpreter(null, new DataBaseCommand[] {}, null, null);
     }
 }

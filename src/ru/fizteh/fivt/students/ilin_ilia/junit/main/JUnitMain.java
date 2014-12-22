@@ -1,12 +1,20 @@
-package ru.fizteh.fivt.students.ilin_ilia.junit;
+package ru.fizteh.fivt.students.ilin_ilia.junit.main;
 
 
 import ru.fizteh.fivt.storage.strings.Table;
 import ru.fizteh.fivt.storage.strings.TableProvider;
 import ru.fizteh.fivt.storage.strings.TableProviderFactory;
+import ru.fizteh.fivt.students.ilin_ilia.junit.commands.DataBaseCommand;
+import ru.fizteh.fivt.students.ilin_ilia.junit.commands.LambdaFunction;
+import ru.fizteh.fivt.students.ilin_ilia.junit.database.MyTable;
+import ru.fizteh.fivt.students.ilin_ilia.junit.database.MyTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.junit.database.MyTableProviderFactory;
+import ru.fizteh.fivt.students.ilin_ilia.junit.database.WorkingTableProvider;
+import ru.fizteh.fivt.students.ilin_ilia.junit.dbexceptions.StopInterpretationException;
+import ru.fizteh.fivt.students.ilin_ilia.junit.dbexceptions.TableException;
+import ru.fizteh.fivt.students.ilin_ilia.junit.interpreter.DBInterpreter;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class JUnitMain {
 
@@ -21,16 +29,19 @@ public class JUnitMain {
             TableProvider tableProvider = tableProviderFactory.create(dbDirPath);
             WorkingTableProvider workingTableProvider = new WorkingTableProvider(tableProvider);
             run(workingTableProvider, args);
-        } catch (Exception e) {
+        } catch (TableException e) {
+            System.err.println(e.getMessage());
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
             e.printStackTrace();
         }
     }
 
     private static void run(WorkingTableProvider workingTableProvider, String[]args) {
-        new Interpreter(workingTableProvider, new Command[]{
-                new Command("put", 2, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+        new DBInterpreter(workingTableProvider, new DataBaseCommand[]{
+                new DataBaseCommand("put", 2, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         try {
                             if (workingTableProvider.getCurrentTable() != null) {
                                 String old = workingTableProvider.getCurrentTable().put(arguments[0], arguments[1]);
@@ -46,11 +57,9 @@ public class JUnitMain {
                         } catch (IllegalArgumentException | IllegalStateException e) {
                             System.err.println(e.getMessage());
                         }
-                    }
                 }),
-                new Command("get", 1, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("get", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         try {
                             if (workingTableProvider.getCurrentTable() != null) {
                                 String value = workingTableProvider.getCurrentTable().get(arguments[0]);
@@ -66,11 +75,9 @@ public class JUnitMain {
                         } catch (IllegalArgumentException | IllegalStateException e) {
                             System.err.println(e.getMessage());
                         }
-                    }
                 }),
-                new Command("remove", 1, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("remove", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         try {
                             if (workingTableProvider.getCurrentTable() != null) {
                                 String value = workingTableProvider.getCurrentTable().remove(arguments[0]);
@@ -86,21 +93,17 @@ public class JUnitMain {
                         } catch (IllegalArgumentException | IllegalStateException e) {
                             System.err.println(e.getMessage());
                         }
-                    }
                 }),
-                new Command("list", 0, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("list", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println(String.join(", ", workingTableProvider.getCurrentTable().list()));
                         } else {
                             System.out.println("no table");
                         }
-                    }
                 }),
-                new Command("drop", 1, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("drop", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         try {
                             if (workingTableProvider.getCurrentTable() != null) {
                                 if (workingTableProvider.getCurrentTable().getName().equals(arguments[0])) {
@@ -112,11 +115,9 @@ public class JUnitMain {
                         } catch (RuntimeException e) {
                             System.err.println(e.getMessage());
                         }
-                    }
                 }),
-                new Command("create", 1, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("create", -1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         try {
                             if (workingTableProvider.getTableProvider().createTable(arguments[0]) == null) {
                                 System.out.println(arguments[0] + " exists");
@@ -126,44 +127,35 @@ public class JUnitMain {
                         } catch (IllegalArgumentException e) {
                             System.err.println(e.getMessage());
                         }
-                    }
                 }),
-                new Command("size", 0, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("size", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println(workingTableProvider.getCurrentTable().size());
                         } else {
                             System.out.println("no table");
                         }
-                    }
-
                 }),
-                new Command("commit", 0, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("commit", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println("commit");
                             System.out.println(workingTableProvider.getCurrentTable().commit());
                         } else {
                             System.out.println("no table");
                         }
-                    }
                 }),
-                new Command("rollback", 0, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("rollback", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println("rollback");
                             System.out.println(workingTableProvider.getCurrentTable().rollback());
                         } else {
                             System.out.println("no table");
                         }
-                    }
                 }),
-                new Command("use", 1, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("use", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         int unsavedChanges = 0;
                         boolean isChanges = false;
                         if (workingTableProvider.getCurrentTable() != null) {
@@ -185,11 +177,9 @@ public class JUnitMain {
                         if (isChanges) {
                             System.err.println(unsavedChanges + " unsaved changes");
                         }
-                    }
                 }),
-                new Command("show tables", 0, new BiConsumer<WorkingTableProvider, String[]>() {
-                    @Override
-                    public void accept(WorkingTableProvider workingTableProvider, String[] arguments) {
+                new DataBaseCommand("show tables", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         MyTableProvider myTableProvider = (MyTableProvider) workingTableProvider.getTableProvider();
                         List<String> tableList = myTableProvider.getTableList();
                         if (tableList != null) {
@@ -200,8 +190,16 @@ public class JUnitMain {
                         } else {
                             System.out.println();
                         }
-                    }
-                })
+                }),
+                new DataBaseCommand("exit", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                        (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
+
+                            if (workingTableProvider != null) {
+                                MyTableProvider myTableProvider = (MyTableProvider) workingTableProvider.getTableProvider();
+                                myTableProvider.saveDb();
+                            }
+                            throw new StopInterpretationException();
+                        })
         }).run(args);
     }
 }
