@@ -88,16 +88,7 @@ public class MyStoreable implements Storeable {
     public String getStringAt(int columnIndex) throws ColumnFormatException, IndexOutOfBoundsException {
         return String.class.cast(getColumnAt(columnIndex));
     }
-
-    public boolean equals(Storeable store) {
-        for (int i = 0; i < keys.length; i++) {
-            if (!keys[i].equals(store.getColumnAt(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
+    
     int size() {
         return keys.length;
     }
