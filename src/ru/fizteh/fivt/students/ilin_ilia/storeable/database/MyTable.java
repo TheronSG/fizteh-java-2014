@@ -67,7 +67,7 @@ public class MyTable implements Table {
                     if (directory.isDirectory()) {
                         for (String file : directory.list()) {
                             String fileName = file.substring(0, file.length() - 4);
-                            DirFile dirFile = new DirFile(Integer.parseInt(dir),Integer.parseInt(fileName));
+                            DirFile dirFile = new DirFile(Integer.parseInt(dir), Integer.parseInt(fileName));
                             inputFiles.put(dirFile, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
                                     this.name.resolve(dir).toString(), this, containsTableProvider));
                             changingFiles.put(dirFile, new FileMap(this.name.resolve(dir).resolve(fileName).toString(),
@@ -149,7 +149,8 @@ public class MyTable implements Table {
             }
             try {
                 changingFiles.put(dirFile,
-                        new FileMap(name.resolve(dirFile.getDir().toString()).resolve(dirFile.getFile().toString()).toString(),
+                        new FileMap(name.resolve(dirFile.getDir().toString()).
+                                resolve(dirFile.getFile().toString()).toString(),
                                 name.resolve(dirFile.getDir().toString()).toString(), this, containsTableProvider));
             } catch (ParseException e) {
                 throw new ColumnFormatException(e.getMessage());
@@ -247,13 +248,13 @@ public class MyTable implements Table {
                 }
                 fileSignature.close();
             } catch (IOException e) {
-                throw new IOException("Can't create \"signature.tsv\" file for table \"" + name.toString() + "\"." );
+                throw new IOException("Can't create \"signature.tsv\" file for table \"" + name.toString() + "\".");
             }
         }
         for (FileMap fileMap : inputFiles.values()) {
                 fileMap.dumpDataToFile();
         }
-        if(commitKeys.size() != 0 && isInvitated) {
+        if (commitKeys.size() != 0 && isInvitated) {
             throw new TableException(commitKeys.size() + " unsaved changes");
         }
     }
