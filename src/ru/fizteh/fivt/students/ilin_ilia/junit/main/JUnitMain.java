@@ -31,8 +31,7 @@ public class JUnitMain {
             run(workingTableProvider, args);
         } catch (TableException e) {
             System.err.println(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
         }
@@ -145,7 +144,8 @@ public class JUnitMain {
                             System.out.println("no table");
                         }
                 }),
-                new DataBaseCommand("rollback", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("rollback", 0, workingTableProvider,
+                        (LambdaFunction<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         if (workingTableProvider.getCurrentTable() != null) {
                             System.out.println("rollback");
@@ -168,7 +168,7 @@ public class JUnitMain {
                         if (workingTableProvider.getTableProvider().getTable(arguments[0]) != null) {
                             workingTableProvider.setCurrentTable(workingTableProvider.getTableProvider()
                                     .getTable(arguments[0]));
-                            MyTable myTable = (MyTable)workingTableProvider.getCurrentTable();
+                            MyTable myTable = (MyTable) workingTableProvider.getCurrentTable();
                             myTable.setIsInvitatedTrue();
                             System.out.println("using " + arguments[0]);
                         } else  {
@@ -178,7 +178,8 @@ public class JUnitMain {
                             System.err.println(unsavedChanges + " unsaved changes");
                         }
                 }),
-                new DataBaseCommand("show tables", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("show tables", 0,
+                        workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                         MyTableProvider myTableProvider = (MyTableProvider) workingTableProvider.getTableProvider();
                         List<String> tableList = myTableProvider.getTableList();
@@ -195,7 +196,8 @@ public class JUnitMain {
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
 
                             if (workingTableProvider != null) {
-                                MyTableProvider myTableProvider = (MyTableProvider) workingTableProvider.getTableProvider();
+                                MyTableProvider myTableProvider =
+                                        (MyTableProvider) workingTableProvider.getTableProvider();
                                 myTableProvider.saveDb();
                             }
                             throw new StopInterpretationException();
