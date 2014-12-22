@@ -20,7 +20,8 @@ public class FileMap {
     private TableProvider containsTableProvider;
     public static final String ENCODING = "UTF-8";
 
-    FileMap(final String pathToFile, final String pathToContainingDir, Table table, TableProvider tableProvider) throws ParseException {
+    FileMap(final String pathToFile, final String pathToContainingDir, Table table,
+            TableProvider tableProvider) throws ParseException {
         containingTable = table;
         containsTableProvider = tableProvider;
         map = new HashMap<>();
