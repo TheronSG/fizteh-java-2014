@@ -31,7 +31,8 @@ public class DataBaseCommand extends Command {
          */
         if (argumentsAmount != -1) {
             if (parameters.length != argumentsAmount) {
-                Utils.interpreterError("Invalid number of arguments: " + argumentsAmount + " expected, " + parameters.length
+                Utils.interpreterError("Invalid number of arguments: " +
+                        argumentsAmount + " expected, " + parameters.length
                         + " found.");
             } else {
                 callback.accept(workingTableProvider, parameters);
