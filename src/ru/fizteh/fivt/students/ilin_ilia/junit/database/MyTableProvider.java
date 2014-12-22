@@ -29,8 +29,8 @@ public class MyTableProvider implements TableProvider {
             try {
                 curTableProvider.mkdir();
             } catch (SecurityException e) {
-                throw new TableException("Can't create the following directory: \"" +
-                        curTableProvider.getName() + "\"");
+                throw new TableException("Can't create the following directory: \""
+                        + curTableProvider.getName() + "\"");
             }
         }
     }
