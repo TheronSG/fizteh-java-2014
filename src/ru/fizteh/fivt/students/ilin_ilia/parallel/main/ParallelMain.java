@@ -182,7 +182,8 @@ public class ParallelMain {
                                     }
                                     classes.add(Class.forName("java.lang." + className));
                                 }
-                                if (workingTableProvider.getTableProvider().createTable(arguments[0], classes) == null) {
+                                if (workingTableProvider.getTableProvider().createTable(arguments[0],
+                                        classes) == null) {
                                     System.out.println(arguments[0] + " exists");
                                 } else {
                                     System.out.println("created");
@@ -256,7 +257,8 @@ public class ParallelMain {
                 new DataBaseCommand("show tables", 0, workingTableProvider,
                         (LambdaFunction<WorkingTableProvider, String[]>)
                                 (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
-                                    MyTableProvider myTableProvider = (MyTableProvider) workingTableProvider.getTableProvider();
+                                    MyTableProvider myTableProvider =
+                                            (MyTableProvider) workingTableProvider.getTableProvider();
                                     List<String> tableList = myTableProvider.getTableNames();
                                     if (tableList.size() != 0) {
                                         for (String tableName : tableList) {
@@ -272,7 +274,8 @@ public class ParallelMain {
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
 
                             if (workingTableProvider != null) {
-                                MyTableProvider myTableProvider = (MyTableProvider) workingTableProvider.getTableProvider();
+                                MyTableProvider myTableProvider =
+                                        (MyTableProvider) workingTableProvider.getTableProvider();
                                 try {
                                     myTableProvider.saveDb();
                                 } catch (IOException e) {
