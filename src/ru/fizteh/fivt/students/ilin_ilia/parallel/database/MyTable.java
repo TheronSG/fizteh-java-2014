@@ -32,7 +32,7 @@ public class MyTable implements Table {
      * isExists shows us file has been created before the program or not.
      */
     private HashMap<DirFile, FileMap> inputFiles;
-    private ThreadLocal<HashMap<DirFile, FileMap>> changingFiles;
+    private ThreadLocal<HashMap<DirFile, FileMap>> changingFiles = ThreadLocal.withInitial(HashMap::new);
     public static final String ENCODING = "UTF-8";
     public static final int MAX_DIRECTORIES_AMOUNT  = 16;
     public static final int MAX_FILES_AMOUNT  = 16;
@@ -47,8 +47,8 @@ public class MyTable implements Table {
      * isInvitated can be true only in current table.
      */
     private boolean isInvitated;
-    private ReadWriteLock lock;
-    private AtomicBoolean invalid;
+    private ReadWriteLock lock = new ReentrantReadWriteLock(true);
+    private AtomicBoolean invalid = new AtomicBoolean(false);
 
     MyTable(final String name, List<Class<?>> columnTypes, TableProvider tableProvider)
             throws IOException, ClassNotFoundException, ParseException {
@@ -59,12 +59,9 @@ public class MyTable implements Table {
                 this.columnTypes[i] = columnTypes.get(i);
             }
         }
-        lock = new ReentrantReadWriteLock(true);
         commitKeys = new LinkedList<>();
         this.name = Paths.get(name);
         inputFiles = new HashMap<>();
-        invalid = new AtomicBoolean(false);
-        changingFiles = ThreadLocal.withInitial(HashMap::new);
         File curTable = new File(name);
         if (curTable.exists()) {
             isExists = true;
@@ -115,14 +112,15 @@ public class MyTable implements Table {
 
     @Override
     public String getName() {
+        checkIsExists();
         return name.toString();
     }
 
     @Override
     public Storeable get(final String key) {
-        checkIsExists();
         lock.readLock().lock();
         try {
+            checkIsExists();
             if (key == null) {
                 throw new IllegalArgumentException("Can't get value. Empty key is impossible.");
             }
@@ -138,9 +136,9 @@ public class MyTable implements Table {
 
     @Override
     public Storeable put(String key, Storeable value) throws ColumnFormatException {
-        checkIsExists();
         lock.readLock().lock();
         try {
+            checkIsExists();
             if (key == null) {
                 throw new IllegalArgumentException("Can't put value for empty key.");
             }
@@ -182,9 +180,9 @@ public class MyTable implements Table {
 
     @Override
     public Storeable remove(final String key) {
-        checkIsExists();
         lock.readLock().lock();
         try {
+            checkIsExists();
             if (key == null) {
                 throw new IllegalArgumentException("Can't remove value for empty key.");
             }
@@ -204,9 +202,9 @@ public class MyTable implements Table {
 
     @Override
     public int size() {
-        checkIsExists();
         lock.readLock().lock();
         try {
+            checkIsExists();
             int sum = 0;
             for (FileMap fileMap : changingFiles.get().values()) {
                 sum += fileMap.size();
@@ -219,13 +217,14 @@ public class MyTable implements Table {
 
     @Override
     public int commit() throws IOException {
-        checkIsExists();
         lock.writeLock().lock();
         try {
+            checkIsExists();
             inputFiles.clear();
             inputFiles = (HashMap<DirFile, FileMap>) changingFiles.get().clone();
             changesAfterCommit = commitKeys.size();
             commitKeys.clear();
+            saveDB();
             return changesAfterCommit;
         } finally {
             lock.writeLock().unlock();
@@ -277,9 +276,9 @@ public class MyTable implements Table {
 
     @Override
     public List<String> list() {
-        checkIsExists();
         lock.readLock().lock();
         try {
+            checkIsExists();
             List<String> keys = new LinkedList<>();
             for (FileMap fileMap : changingFiles.get().values()) {
                 keys.addAll(fileMap.list().stream().collect(Collectors.toList()));
