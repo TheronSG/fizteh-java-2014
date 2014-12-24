@@ -66,7 +66,8 @@ public class MyTableProvider implements TableProvider {
             if (name == null) {
                 throw new IllegalArgumentException("Can't create table. Empty name is impossible for it.");
             } else if (!checkNameCorrection(name)) {
-                throw new IllegalArgumentException("Can't create table. " + "\"" + name + "\" has inadmissible symbols");
+                throw new IllegalArgumentException("Can't create table. "
+                        + "\"" + name + "\" has inadmissible symbols");
             } else {
                 if (tables.containsKey(name)) {
                     return null;
@@ -91,7 +92,8 @@ public class MyTableProvider implements TableProvider {
             if (name == null) {
                 throw new IllegalArgumentException("Can't remove table. Empty name is impossible for it.");
             } else if (!checkNameCorrection(name)) {
-                throw new IllegalArgumentException("Can't remove table. " + "\"" + name + "\" has inadmissible symbols");
+                throw new IllegalArgumentException("Can't remove table. " + "\""
+                        + name + "\" has inadmissible symbols");
             } else {
                 if (!new File(currentFactory.resolve(name).toString()).exists()) {
                     throw new IllegalStateException(name + " not exists");
