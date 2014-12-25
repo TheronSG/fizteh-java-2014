@@ -5,7 +5,7 @@ import ru.fizteh.fivt.storage.structured.Table;
 import ru.fizteh.fivt.storage.structured.TableProvider;
 import ru.fizteh.fivt.storage.structured.TableProviderFactory;
 import ru.fizteh.fivt.students.ilin_ilia.parallel.commands.DataBaseCommand;
-import ru.fizteh.fivt.students.ilin_ilia.parallel.commands.LambdaFunction;
+import ru.fizteh.fivt.students.ilin_ilia.parallel.commands.DataBaseCommandsExecutor;
 import ru.fizteh.fivt.students.ilin_ilia.parallel.database.*;
 import ru.fizteh.fivt.students.ilin_ilia.parallel.dbexceptions.StopInterpretationException;
 import ru.fizteh.fivt.students.ilin_ilia.parallel.dbexceptions.TableException;
@@ -13,10 +13,7 @@ import ru.fizteh.fivt.students.ilin_ilia.parallel.interpreter.DBInterpreter;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ParallelMain {
     private static Map<String, String> classesMap = new HashMap<>();
@@ -47,8 +44,17 @@ public class ParallelMain {
     }
 
     private static void run(WorkingTableProvider workingTableProvider, String[]args) {
+        /**
+         * If there are some uncommitted changes and we stop the programme
+         * this flag shows if we have printed the message about uncommitted
+         * changes.
+         * It's false if we printed it or there is no uncommitted changes.
+         * isInvitated can be true only in current table.
+         */
+        final boolean[] isInvitated = new boolean[1];
+        isInvitated[0] = true;
         new DBInterpreter(workingTableProvider, new DataBaseCommand[]{
-                new DataBaseCommand("put", 2, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("put", 2, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             try {
                                 if (workingTableProvider.getCurrentTable() != null) {
@@ -64,6 +70,7 @@ public class ParallelMain {
                                         TableProvider tableProvider = workingTableProvider.getTableProvider();
                                         System.out.println(tableProvider.serialize(table, myStoreable));
                                     }
+                                    isInvitated[0] = false;
                                 } else {
                                     System.out.println("no table");
                                 }
@@ -71,7 +78,7 @@ public class ParallelMain {
                                 System.err.println("wrong type (" + e.getMessage() + ")");
                             }
                         }),
-                new DataBaseCommand("get", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("get", 1, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             try {
                                 if (workingTableProvider.getCurrentTable() != null) {
@@ -92,7 +99,7 @@ public class ParallelMain {
                                 System.err.println("wrong type (" + e.getMessage() + ")");
                             }
                         }),
-                new DataBaseCommand("remove", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("remove", 1, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             try {
                                 if (workingTableProvider.getCurrentTable() != null) {
@@ -113,7 +120,7 @@ public class ParallelMain {
                                 System.err.println("wrong type (" + e.getMessage() + ")");
                             }
                         }),
-                new DataBaseCommand("list", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("list", 0, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             if (workingTableProvider.getCurrentTable() != null) {
                                 System.out.println(String.join(", ", workingTableProvider.getCurrentTable().list()));
@@ -121,7 +128,7 @@ public class ParallelMain {
                                 System.out.println("no table");
                             }
                         }),
-                new DataBaseCommand("drop", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("drop", 1, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             try {
                                 if (workingTableProvider.getCurrentTable() != null) {
@@ -131,21 +138,22 @@ public class ParallelMain {
                                 }
                                 workingTableProvider.getTableProvider().removeTable(arguments[0]);
                                 System.out.println("dropped");
+                                isInvitated[0] = true;
                             } catch (IOException | RuntimeException e) {
                                 e.printStackTrace();
                             }
                         }),
-                new DataBaseCommand("create", -1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("create", -1, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             String className = "";
                             try {
                                 List<Class<?>> classes = new LinkedList<>();
                                 if (arguments[1].charAt(0) != '(') {
-                                    throw new IllegalArgumentException("Wrong data format! \'(\' is missed.");
+                                    throw new IllegalArgumentException("Wrong data format! \'(\' is missed");
                                 }
                                 if (arguments[arguments.length - 1].charAt(arguments[arguments.length - 1].length() - 1)
                                         != ')') {
-                                    throw new IllegalArgumentException("Wrong data format! \')\' is missed.");
+                                    throw new IllegalArgumentException("Wrong data format! \')\' is missed");
                                 }
                                 if (arguments.length != 2) {
                                     className = arguments[1].substring(1, arguments[1].length());
@@ -194,7 +202,7 @@ public class ParallelMain {
                                 System.err.println(e.getMessage());
                             }
                         }),
-                new DataBaseCommand("size", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("size", 0, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             if (workingTableProvider.getCurrentTable() != null) {
                                 System.out.println(workingTableProvider.getCurrentTable().size());
@@ -202,12 +210,13 @@ public class ParallelMain {
                                 System.out.println("no table");
                             }
                         }),
-                new DataBaseCommand("commit", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("commit", 0, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             try {
                                 if (workingTableProvider.getCurrentTable() != null) {
                                     System.out.println("commit");
                                     System.out.println(workingTableProvider.getCurrentTable().commit());
+                                    isInvitated[0] = true;
                                 } else {
                                     System.out.println("no table");
                                 }
@@ -216,16 +225,17 @@ public class ParallelMain {
                             }
                         }),
                 new DataBaseCommand("rollback", 0, workingTableProvider,
-                        (LambdaFunction<WorkingTableProvider, String[]>)
+                        (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                                 (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                                     if (workingTableProvider.getCurrentTable() != null) {
                                         System.out.println("rollback");
                                         System.out.println(workingTableProvider.getCurrentTable().rollback());
+                                        isInvitated[0] = true;
                                     } else {
                                         System.out.println("no table");
                                     }
                                 }),
-                new DataBaseCommand("use", 1, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("use", 1, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                             int unsavedChanges = 0;
                             boolean isChanges = false;
@@ -245,7 +255,7 @@ public class ParallelMain {
                                 workingTableProvider.setCurrentTable(workingTableProvider.getTableProvider()
                                         .getTable(arguments[0]));
                                 MyTable myTable = (MyTable) workingTableProvider.getCurrentTable();
-                                myTable.setIsInvitatedTrue();
+                                isInvitated[0] = true;
                                 System.out.println("using " + arguments[0]);
                             } else  {
                                 System.out.println(arguments[0] + " not exists");
@@ -255,7 +265,7 @@ public class ParallelMain {
                             }
                         }),
                 new DataBaseCommand("show tables", 0, workingTableProvider,
-                        (LambdaFunction<WorkingTableProvider, String[]>)
+                        (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                                 (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
                                     MyTableProvider myTableProvider =
                                             (MyTableProvider) workingTableProvider.getTableProvider();
@@ -270,13 +280,19 @@ public class ParallelMain {
                                     }
 
                                 }),
-                new DataBaseCommand("exit", 0, workingTableProvider, (LambdaFunction<WorkingTableProvider, String[]>)
+                new DataBaseCommand("exit", 0, workingTableProvider, (DataBaseCommandsExecutor<WorkingTableProvider, String[]>)
                         (WorkingTableProvider workingTableProvider1, String[] arguments) -> {
 
                             if (workingTableProvider != null) {
                                 MyTableProvider myTableProvider =
                                         (MyTableProvider) workingTableProvider.getTableProvider();
                                 try {
+                                    if (!isInvitated[0] &&
+                                            workingTableProvider.getCurrentTable().getNumberOfUncommittedChanges()
+                                                    != 0) {
+                                        System.out.println(workingTableProvider.getCurrentTable().
+                                                getNumberOfUncommittedChanges() + " unsaved changes");
+                                    }
                                     myTableProvider.saveDb();
                                 } catch (IOException e) {
                                     e.printStackTrace();
