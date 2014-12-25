@@ -5,21 +5,39 @@ import ru.fizteh.fivt.students.ilin_ilia.parallel.dbexceptions.StopInterpretatio
 public abstract class Command {
     private String name;
     private int argumentsAmount;
-    private LambdaFunction<Object, String[]> callback;
+    private DataBaseCommandsExecutor<Object, String[]> callback;
 
     public Command(final String name, final int argumentsAmount,
-                        final LambdaFunction<Object, String[]> callback) {
+                        final DataBaseCommandsExecutor<Object, String[]> callback) {
         this.name = name;
         this.argumentsAmount = argumentsAmount;
         this.callback = callback;
     }
 
-    public Command() {
-    }
 
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public abstract void execute(Object object, String[] parameters) throws StopInterpretationException;
+
+    public int getArgumentsAmount() {
+        return argumentsAmount;
+    }
+
+    public void setArgumentsAmount(int argumentsAmount) {
+        this.argumentsAmount = argumentsAmount;
+    }
+
+    public DataBaseCommandsExecutor<Object, String[]> getCallback() {
+        return callback;
+    }
+
+    public void setCallback(DataBaseCommandsExecutor<Object, String[]> callback) {
+        this.callback = callback;
+    }
 }
