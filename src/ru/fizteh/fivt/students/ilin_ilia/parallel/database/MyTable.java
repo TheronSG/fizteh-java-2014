@@ -34,19 +34,12 @@ public class MyTable implements Table {
     private HashMap<DirFile, FileMap> inputFiles;
     private ThreadLocal<HashMap<DirFile, FileMap>> changingFiles = ThreadLocal.withInitial(HashMap::new);
     public static final String ENCODING = "UTF-8";
+    public static final String SIGNATURE_FILE = "signature.tsv";
     public static final int MAX_DIRECTORIES_AMOUNT  = 16;
     public static final int MAX_FILES_AMOUNT  = 16;
     private Class[] columnTypes;
     private boolean isExists;
     private TableProvider containsTableProvider;
-    /**
-     * If there are some uncommitted changes and we stop the programme
-     * this flag shows if we have printed the message about uncommitted
-     * changes.
-     * It's false if we printed it or there is no uncommitted changes.
-     * isInvitated can be true only in current table.
-     */
-    private boolean isInvitated;
     private ReadWriteLock lock = new ReentrantReadWriteLock(true);
     private AtomicBoolean invalid = new AtomicBoolean(false);
 
@@ -98,12 +91,12 @@ public class MyTable implements Table {
         }
     }
 
-    public DirFile convertIntoHashRule(final String key) {
+    private DirFile convertIntoHashRule(final String key) {
         byte byt = 0;
         try {
             byt = key.getBytes(ENCODING)[0];
         } catch (UnsupportedEncodingException e) {
-            throw new TableException("Can't decode key according to ENCODING.");
+            throw new TableException("Can't decode key according to ENCODING");
         }
         int ndir = byt % MAX_DIRECTORIES_AMOUNT;
         int nfile = (byt / MAX_FILES_AMOUNT) % MAX_FILES_AMOUNT;
@@ -112,7 +105,7 @@ public class MyTable implements Table {
 
     @Override
     public String getName() {
-        checkIsExists();
+        checkIsTableExists();
         return name.toString();
     }
 
@@ -120,9 +113,9 @@ public class MyTable implements Table {
     public Storeable get(final String key) {
         lock.readLock().lock();
         try {
-            checkIsExists();
+            checkIsTableExists();
             if (key == null) {
-                throw new IllegalArgumentException("Can't get value. Empty key is impossible.");
+                throw new IllegalArgumentException("Can't get value. Empty key is impossible");
             }
             if (changingFiles.get().containsKey(convertIntoHashRule(key))) {
                 return changingFiles.get().get(convertIntoHashRule(key)).get(key);
@@ -138,12 +131,12 @@ public class MyTable implements Table {
     public Storeable put(String key, Storeable value) throws ColumnFormatException {
         lock.readLock().lock();
         try {
-            checkIsExists();
+            checkIsTableExists();
             if (key == null) {
-                throw new IllegalArgumentException("Can't put value for empty key.");
+                throw new IllegalArgumentException("Can't put value for empty key");
             }
             if (value == null) {
-                throw new IllegalArgumentException("Can't put empty value.");
+                throw new IllegalArgumentException("Can't put empty value");
             }
             DirFile dirFile = convertIntoHashRule(key);
             if (changingFiles.get().containsKey(dirFile)) {
@@ -182,9 +175,9 @@ public class MyTable implements Table {
     public Storeable remove(final String key) {
         lock.readLock().lock();
         try {
-            checkIsExists();
+            checkIsTableExists();
             if (key == null) {
-                throw new IllegalArgumentException("Can't remove value for empty key.");
+                throw new IllegalArgumentException("Can't remove value for empty key");
             }
             if (!commitKeys.contains(key)) {
                 commitKeys.remove(key);
@@ -204,7 +197,7 @@ public class MyTable implements Table {
     public int size() {
         lock.readLock().lock();
         try {
-            checkIsExists();
+            checkIsTableExists();
             int sum = 0;
             for (FileMap fileMap : changingFiles.get().values()) {
                 sum += fileMap.size();
@@ -219,7 +212,7 @@ public class MyTable implements Table {
     public int commit() throws IOException {
         lock.writeLock().lock();
         try {
-            checkIsExists();
+            checkIsTableExists();
             inputFiles.clear();
             inputFiles = (HashMap<DirFile, FileMap>) changingFiles.get().clone();
             changesAfterCommit = commitKeys.size();
@@ -231,9 +224,9 @@ public class MyTable implements Table {
         }
     }
 
-    private void checkIsExists() {
+    private void checkIsTableExists() {
         if (invalid.get()) {
-            throw new IllegalStateException("Table \"" + name + "\" doesn't exists.");
+            throw new IllegalStateException("Table \"" + name + "\" doesn't exists");
         }
     }
 
@@ -244,32 +237,37 @@ public class MyTable implements Table {
 
     @Override
     public int rollback() {
-        checkIsExists();
-        int returnValue = changesAfterCommit;
-        changesAfterCommit = 0;
-        commitKeys.clear();
-        changingFiles.get().clear();
-        changingFiles = (ThreadLocal<HashMap<DirFile, FileMap>>) inputFiles.clone();
-        return returnValue;
+        lock.writeLock().lock();
+        try {
+            checkIsTableExists();
+            int returnValue = changesAfterCommit;
+            changesAfterCommit = 0;
+            commitKeys.clear();
+            changingFiles.get().clear();
+            changingFiles = (ThreadLocal<HashMap<DirFile, FileMap>>) inputFiles.clone();
+            return returnValue;
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     @Override
     public int getNumberOfUncommittedChanges() {
-        checkIsExists();
+        checkIsTableExists();
         return commitKeys.size();
     }
 
     @Override
     public int getColumnsCount() {
-        checkIsExists();
+        checkIsTableExists();
         return columnTypes.length;
     }
 
     @Override
     public Class<?> getColumnType(int columnIndex) throws IndexOutOfBoundsException {
-        checkIsExists();
+        checkIsTableExists();
         if (columnIndex > columnTypes.length) {
-            throw new IndexOutOfBoundsException("Wrong index.");
+            throw new IndexOutOfBoundsException("Wrong index");
         }
         return columnTypes[columnIndex];
     }
@@ -278,7 +276,7 @@ public class MyTable implements Table {
     public List<String> list() {
         lock.readLock().lock();
         try {
-            checkIsExists();
+            checkIsTableExists();
             List<String> keys = new LinkedList<>();
             for (FileMap fileMap : changingFiles.get().values()) {
                 keys.addAll(fileMap.list().stream().collect(Collectors.toList()));
@@ -292,7 +290,7 @@ public class MyTable implements Table {
     public void saveDB() throws IOException {
         if (!isExists) {
             try {
-                File signature = name.resolve("signature.tsv").toFile();
+                File signature = name.resolve(SIGNATURE_FILE).toFile();
                 signature.createNewFile();
                 RandomAccessFile fileSignature = new RandomAccessFile(signature, "rw");
                 int count = 0;
@@ -305,20 +303,17 @@ public class MyTable implements Table {
                 }
                 fileSignature.close();
             } catch (IOException e) {
-                throw new IOException("Can't create \"signature.tsv\" file for table \"" + name.toString() + "\".");
+                throw new IOException("Can't create \"" + SIGNATURE_FILE + "\" file for table \"" + name.toString() + "\"");
             }
         }
         for (FileMap fileMap : inputFiles.values()) {
             fileMap.dumpDataToFile();
         }
-        if (commitKeys.size() != 0 && isInvitated) {
-            throw new TableException(commitKeys.size() + " unsaved changes");
-        }
     }
     public void readDB() throws IOException, ClassNotFoundException {
-        File signature = name.resolve("signature.tsv").toFile();
+        File signature = name.resolve(SIGNATURE_FILE).toFile();
         if (!signature.exists()) {
-            throw new FileNotFoundException("Error! There is no signature file in table \"" + name.toString() + "\".");
+            throw new FileNotFoundException("Error! There is no signature file in table \"" + name.toString() + "\"");
         }
         RandomAccessFile fileSignature = new RandomAccessFile(signature, "rw");
         List<String> types = new LinkedList<>();
@@ -335,14 +330,9 @@ public class MyTable implements Table {
             try {
                 columnTypes[i] = Class.forName(types.get(i));
             } catch (ClassNotFoundException e) {
-                throw new ClassNotFoundException("Convert error! Class \"" + types.get(i) + "\" doesn't exist.");
+                throw new ClassNotFoundException("Convert error! Class \"" + types.get(i) + "\" doesn't exist");
             }
         }
         fileSignature.close();
-    }
-
-    public void setIsInvitatedTrue() {
-        checkIsExists();
-        isInvitated = true;
     }
 }
