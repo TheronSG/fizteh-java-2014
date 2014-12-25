@@ -48,7 +48,7 @@ public class MyTableProvider implements TableProvider {
         lock.readLock().lock();
         try {
             if (name == null) {
-                throw new IllegalArgumentException("Can't get table. Empty name is impossible for it.");
+                throw new IllegalArgumentException("Can't get table. Empty name is impossible for it");
             } else if (!checkNameCorrection(name)) {
                 throw new IllegalArgumentException("Can't get table. " + "\"" + name + "\" has inadmissible symbols");
             } else {
@@ -64,7 +64,7 @@ public class MyTableProvider implements TableProvider {
         lock.readLock().lock();
         try {
             if (name == null) {
-                throw new IllegalArgumentException("Can't create table. Empty name is impossible for it.");
+                throw new IllegalArgumentException("Can't create table. Empty name is impossible for it");
             } else if (!checkNameCorrection(name)) {
                 throw new IllegalArgumentException("Can't create table. "
                         + "\"" + name + "\" has inadmissible symbols");
@@ -90,7 +90,7 @@ public class MyTableProvider implements TableProvider {
         lock.writeLock().lock();
         try {
             if (name == null) {
-                throw new IllegalArgumentException("Can't remove table. Empty name is impossible for it.");
+                throw new IllegalArgumentException("Can't remove table. Empty name is impossible for it");
             } else if (!checkNameCorrection(name)) {
                 throw new IllegalArgumentException("Can't remove table. " + "\""
                         + name + "\" has inadmissible symbols");
@@ -102,7 +102,7 @@ public class MyTableProvider implements TableProvider {
                 if (fileName.isFile()) {
                     if (!fileName.delete()) {
                         throw new RuntimeException("Can't remove the following table: " + "\"" + name + "\""
-                                + "There is some IO problem.");
+                                + "There is some IO problem");
                     }
                 }
                 if (fileName.isDirectory()) {
@@ -114,7 +114,7 @@ public class MyTableProvider implements TableProvider {
                         }
                         if (!fileName.delete()) {
                             throw new RuntimeException("Can't remove the following table: " + "\"" + name + "\""
-                                    + "There is some IO problem.");
+                                    + "There is some IO problem");
                         }
                     }
                 }
@@ -133,16 +133,16 @@ public class MyTableProvider implements TableProvider {
             value = value.trim();
             if (value.charAt(0) != '[') {
                 throw new ParseException("Error! String \"" + value + "\" doesn't match the JSON format array. "
-                        + "\'[\' must be on the first place.", 0);
+                        + "\'[\' must be on the first place", 0);
             }
             if (value.charAt(value.length() - 1) != ']') {
                 throw new ParseException("Error! String \"" + value + "\" doesn't match the JSON format array. "
-                        + "\']\' must be at the end of the string.", value.length() - 1);
+                        + "\']\' must be at the end of the string", value.length() - 1);
             }
             if (value.substring(1, value.length() - 1).trim().equals("")) {
-                throw new ParseException("Error! Empty value.", 1);
+                throw new ParseException("Error! Empty value", 1);
             }
-            boolean isNullString = false;
+            boolean isNullString;
             String buff = "";
             List<String> parts = new LinkedList<>();
             value = value.substring(1, value.length() - 1);
@@ -195,7 +195,7 @@ public class MyTableProvider implements TableProvider {
                         } else if (table.getColumnType(i) == Double.class) {
                             storeable.setColumnAt(i, Double.valueOf(parts.get(i)));
                         } else {
-                            // Can not be.
+                            throw new RuntimeException("Should not be reached");
                         }
                     }
                 }
@@ -223,21 +223,22 @@ public class MyTableProvider implements TableProvider {
                 }
             }
             MyStoreable myStoreable = (MyStoreable) value;
-            String resultString = "[";
+            StringBuilder resultString = new StringBuilder();
+            resultString.append("[");
             for (int index = 0; index < myStoreable.size(); index++) {
                 if (value.getColumnAt(index) != null) {
                     if (table.getColumnType(index) == String.class) {
-                        resultString += "\"" + value.getStringAt(index) + "\", ";
+                        resultString.append("\"" + value.getStringAt(index) + "\", ");
                     } else {
-                        resultString += value.getColumnAt(index).toString() + ", ";
+                        resultString.append(value.getColumnAt(index).toString() + ", ");
                     }
                 } else {
-                    resultString += "null, ";
+                    resultString.append("null, ");
                 }
             }
-            resultString = resultString.substring(0, resultString.length() - 2);
-            resultString += "]";
-            return resultString;
+            resultString = resultString.delete(resultString.length() - 2, resultString.length());
+            resultString.append("]");
+            return resultString.toString();
         } finally {
             lock.readLock().unlock();
         }
@@ -268,7 +269,7 @@ public class MyTableProvider implements TableProvider {
         lock.readLock().lock();
         try {
             Set<String> tableNames = tables.keySet();
-            return tableNames.stream().collect(Collectors.toCollection(() -> new LinkedList<>()));
+            return tableNames.stream().collect(Collectors.toCollection(LinkedList::new));
         } finally {
             lock.readLock().unlock();
         }
@@ -284,6 +285,6 @@ public class MyTableProvider implements TableProvider {
             MyTable myTable = (MyTable) table;
             myTable.saveDB();
         }
-        System.out.println("All unsaved changes are rolled back.");
+        System.out.println("All unsaved changes are rolled back");
     }
 }
