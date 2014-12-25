@@ -1,15 +1,17 @@
 package ru.fizteh.fivt.students.ilin_ilia.parallel.interpreter;
 
-import ru.fizteh.fivt.students.ilin_ilia.parallel.utils.Utils;
 import ru.fizteh.fivt.students.ilin_ilia.parallel.commands.Command;
 import ru.fizteh.fivt.students.ilin_ilia.parallel.dbexceptions.StopInterpretationException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
-public class Interpreter {
+public abstract class Interpreter {
     public static final String PROMPT = "$ ";
 
     private final Map<String, Command> commands;
@@ -23,10 +25,10 @@ public class Interpreter {
     public Interpreter(Command[] commands,
                        InputStream in, PrintStream out) {
         if (in == null) {
-            throw new IllegalArgumentException("Null InputSteam.");
+            throw new IllegalArgumentException("Null InputSteam");
         }
         if (out == null) {
-            throw new IllegalArgumentException("Null PrintSteam.");
+            throw new IllegalArgumentException("Null PrintSteam");
         }
         this.in = in;
         this.out = out;
@@ -66,19 +68,9 @@ public class Interpreter {
     public void batchMode(final String[] args) throws StopInterpretationException, IOException {
         executeLine(String.join(" ", args));
     }
+    public abstract void executeLine(String line) throws StopInterpretationException, IOException;
 
-    private void executeLine(String line) throws StopInterpretationException, IOException {
-        String[] statements = CommandSeparator.separateLine(line);
-        for (String statement : statements) {
-            String[] chunks = CommandSeparator.setCommand(statement);
-            String commandName = chunks[0];
-            Command command = commands.get(commandName);
-            String [] params = Arrays.copyOfRange(chunks, 1, chunks.length);
-            if (command == null) {
-                Utils.interpreterError("Unknown command: " + String.join(" ", chunks));
-            } else {
-                command.execute(new Object(), params);
-            }
-        }
+    public Map<String, Command> getCommands() {
+        return  commands;
     }
 }
