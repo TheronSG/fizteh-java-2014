@@ -6,22 +6,13 @@ import ru.fizteh.fivt.students.ilin_ilia.parallel.dbexceptions.StopInterpretatio
 
 public class DataBaseCommand extends Command {
 
-    private String name;
-    private int argumentsAmount;
-    private LambdaFunction callback;
     private WorkingTableProvider workingTableProvider;
 
     public DataBaseCommand(final String name, final int argumentsAmount,
                            final WorkingTableProvider workingTableProvider,
-                   final LambdaFunction callback) {
-        this.name = name;
-        this.argumentsAmount = argumentsAmount;
-        this.callback = callback;
+                   final DataBaseCommandsExecutor callback) {
+        super(name, argumentsAmount, callback);
         this.workingTableProvider = workingTableProvider;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -29,17 +20,17 @@ public class DataBaseCommand extends Command {
         /**
          * if argumentsAmount == -1 it means that function may have different amount of parameters.
          */
-        if (argumentsAmount != -1) {
-            if (parameters.length != argumentsAmount) {
+        if (getArgumentsAmount() != -1) {
+            if (parameters.length != getArgumentsAmount()) {
                 Utils.interpreterError("Invalid number of arguments: "
-                        + argumentsAmount + " expected, " + parameters.length
+                        + getArgumentsAmount() + " expected, " + parameters.length
                         + " found.");
             } else {
-                callback.accept(workingTableProvider, parameters);
+                getCallback().accept(workingTableProvider, parameters);
             }
         } else {
-            if (name.equals("create") && parameters.length > 1) {
-                callback.accept(workingTableProvider, parameters);
+            if (getName().equals("create") && parameters.length > 1) {
+                getCallback().accept(workingTableProvider, parameters);
             } else {
                 Utils.interpreterError("Invalid number of arguments: expected at least 2, but " + parameters.length
                         + " found.");
