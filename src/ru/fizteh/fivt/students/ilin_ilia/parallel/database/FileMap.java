@@ -11,21 +11,23 @@ import java.text.ParseException;
 import java.util.*;
 
 public class FileMap {
-    private Map<String, Storeable> map;
-    Map<String, String> mapString;
+    private final Map<String, Storeable> map;
+    private  final Map<String, String> mapString;
     private String name;
     private File dbFile;
     private File dbRootDir;
     private Table containingTable;
     private TableProvider containsTableProvider;
+    public static final String FILE_FORMAT = ".dat";
     public static final String ENCODING = "UTF-8";
+
 
     FileMap(final String pathToFile, final String pathToContainingDir, Table table,
             TableProvider tableProvider) throws ParseException {
         containingTable = table;
         containsTableProvider = tableProvider;
         map = new HashMap<>();
-        name = pathToFile + ".dat";
+        name = pathToFile + FILE_FORMAT;
         mapString = new HashMap<>();
         dbFile = new File(name);
         dbRootDir = new File(pathToContainingDir);
@@ -54,7 +56,7 @@ public class FileMap {
         return map.keySet();
     }
 
-    public void exit() throws IOException {
+    public void close() throws IOException {
         try {
             dbFile.createNewFile();
         } catch (SecurityException e) {
@@ -107,7 +109,7 @@ public class FileMap {
                     buf.reset();
                 } else {
                     file.close();
-                    throw new FileMapIOException("Buffer is empty. Incorrect reading of file.");
+                    throw new FileMapIOException("Buffer is empty. Incorrect reading of file");
                 }
             }
         } catch (IOException e) {
